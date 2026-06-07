@@ -1,14 +1,15 @@
 package org.firstinspires.ftc.teamcode.subSystems;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
-import org.firstinspires.ftc.teamcode.HardwareProvider;
+import org.firstinspires.ftc.teamcode.HardwareConfig;
 
 // Intake subsystem
 public class IntakeSub {
+
     private DcMotor intakeMotor;
 
     public IntakeSub() {
-        intakeMotor = HardwareProvider.getDcMotor("intakeMotor");
+        intakeMotor = HardwareConfig.intakeMotor;
     }
 
     // Set intake power

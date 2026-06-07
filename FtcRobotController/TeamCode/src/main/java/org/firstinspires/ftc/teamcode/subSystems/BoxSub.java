@@ -2,16 +2,17 @@ package org.firstinspires.ftc.teamcode.subSystems;
 
 import com.qualcomm.robotcore.hardware.Servo;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
-import org.firstinspires.ftc.teamcode.HardwareProvider;
+import org.firstinspires.ftc.teamcode.HardwareConfig;
 
 // Box discharge subsystem
 public class BoxSub extends SubsystemBase {
+
     private Servo leftServo;
     private Servo rightServo;
 
     public BoxSub() {
-        leftServo = HardwareProvider.getServo("leftServo");
-        rightServo = HardwareProvider.getServo("rightServo");
+        leftServo = HardwareConfig.leftServo;
+        rightServo = HardwareConfig.rightServo;
     }
 
     // Set left servo position

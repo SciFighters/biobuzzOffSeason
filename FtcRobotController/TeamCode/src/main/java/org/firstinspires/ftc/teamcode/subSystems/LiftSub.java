@@ -2,17 +2,17 @@ package org.firstinspires.ftc.teamcode.subSystems;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import org.firstinspires.ftc.teamcode.HardwareProvider;
+import org.firstinspires.ftc.teamcode.HardwareConfig;
 
 // Lift subsystem
 public class LiftSub {
+
     private DcMotor leftLift;
     private DcMotor rightLift;
 
     public LiftSub() {
-        leftLift = HardwareProvider.getDcMotor("leftLift");
-        rightLift = HardwareProvider.getDcMotor("rightLift");
-        rightLift.setDirection(DcMotorSimple.Direction.REVERSE);
+        leftLift = HardwareConfig.leftLift;
+        rightLift = HardwareConfig.rightLift;
     }
 
     // Set lift power
@@ -40,6 +40,8 @@ public class LiftSub {
     // Get lift position
     // @return average position
     public int getPosition() {
-        return (leftLift.getCurrentPosition() + rightLift.getCurrentPosition()) / 2;
+        return (
+            (leftLift.getCurrentPosition() + rightLift.getCurrentPosition()) / 2
+        );
     }
 }

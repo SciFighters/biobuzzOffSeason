@@ -13,22 +13,10 @@ public class DriveSub {
     private DcMotor rearRight;
 
     public DriveSub() {
-        frontLeft = HardwareProvider.getDcMotor("frontLeft");
-        frontRight = HardwareProvider.getDcMotor("frontRight");
-        rearLeft = HardwareProvider.getDcMotor("rearLeft");
-        rearRight = HardwareProvider.getDcMotor("rearRight");
-
-        // Set motor directions
-        frontLeft.setDirection(DcMotorSimple.Direction.FORWARD);
-        frontRight.setDirection(DcMotorSimple.Direction.FORWARD);
-        rearLeft.setDirection(DcMotorSimple.Direction.FORWARD);
-        rearRight.setDirection(DcMotorSimple.Direction.FORWARD);
-
-        // Set zero power behavior
-        frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        rearLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        rearRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        frontLeft = HardwareConfig.frontLeft;
+        frontRight = HardwareConfig.frontRight;
+        rearLeft = HardwareConfig.rearLeft;
+        rearRight = HardwareConfig.rearRight;
     }
 
     // Mecanum drive calculation
