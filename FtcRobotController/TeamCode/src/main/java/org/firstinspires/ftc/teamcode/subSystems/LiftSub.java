@@ -1,18 +1,18 @@
 package org.firstinspires.ftc.teamcode.subSystems;
 
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.arcrobotics.ftclib.command.SubsystemBase;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import org.firstinspires.ftc.teamcode.HardwareConfig;
 
 // Lift subsystem
-public class LiftSub {
+public class LiftSub extends SubsystemBase {
 
-    private DcMotor leftLift;
-    private DcMotor rightLift;
+    private DcMotorEx leftLift;
+    private DcMotorEx rightLift;
 
-    public LiftSub() {
-        leftLift = HardwareConfig.leftLift;
-        rightLift = HardwareConfig.rightLift;
+    public LiftSub(HardwareConfig hm) {
+        leftLift = hm.leftLift;
+        rightLift = hm.rightLift;
     }
 
     // Set lift power
@@ -33,8 +33,8 @@ public class LiftSub {
     public void setPosition(int position) {
         leftLift.setTargetPosition(position);
         rightLift.setTargetPosition(position);
-        leftLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rightLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        leftLift.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        rightLift.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
     }
 
     // Get lift position

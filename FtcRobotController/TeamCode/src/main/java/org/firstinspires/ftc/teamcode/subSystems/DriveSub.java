@@ -1,22 +1,22 @@
 package org.firstinspires.ftc.teamcode.subSystems;
 
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import org.firstinspires.ftc.teamcode.HardwareProvider;
+import com.arcrobotics.ftclib.command.SubsystemBase;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import org.firstinspires.ftc.teamcode.HardwareConfig;
 
 // Drive subsystem for mecanum wheels
-public class DriveSub {
+public class DriveSub extends SubsystemBase {
 
-    private DcMotor frontLeft;
-    private DcMotor frontRight;
-    private DcMotor rearLeft;
-    private DcMotor rearRight;
+    private DcMotorEx frontLeft;
+    private DcMotorEx frontRight;
+    private DcMotorEx rearLeft;
+    private DcMotorEx rearRight;
 
-    public DriveSub() {
-        frontLeft = HardwareConfig.frontLeft;
-        frontRight = HardwareConfig.frontRight;
-        rearLeft = HardwareConfig.rearLeft;
-        rearRight = HardwareConfig.rearRight;
+    public DriveSub(HardwareConfig hm) {
+        frontLeft = hm.frontLeft;
+        frontRight = hm.frontRight;
+        rearLeft = hm.rearLeft;
+        rearRight = hm.rearRight;
     }
 
     // Mecanum drive calculation

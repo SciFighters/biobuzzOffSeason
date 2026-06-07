@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.subSystems;
 
+import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.seattlesolvers.solverslib.command.SubsystemBase;
 import org.firstinspires.ftc.teamcode.HardwareConfig;
 
 // Box discharge subsystem
@@ -10,9 +10,9 @@ public class BoxSub extends SubsystemBase {
     private Servo leftServo;
     private Servo rightServo;
 
-    public BoxSub() {
-        leftServo = HardwareConfig.leftServo;
-        rightServo = HardwareConfig.rightServo;
+    public BoxSub(HardwareConfig hm) {
+        leftServo = hm.leftServo;
+        rightServo = hm.rightServo;
     }
 
     // Set left servo position
