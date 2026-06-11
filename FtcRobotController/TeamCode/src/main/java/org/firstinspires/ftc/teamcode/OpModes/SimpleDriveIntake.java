@@ -1,67 +1,57 @@
 package org.firstinspires.ftc.teamcode.OpModes;
 
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.arcrobotics.ftclib.command.CommandOpMode;
+import com.arcrobotics.ftclib.command.RunCommand;
+import com.arcrobotics.ftclib.command.button.GamepadButton;
+import com.arcrobotics.ftclib.gamepad.GamepadEx;
+import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-
 import org.firstinspires.ftc.teamcode.HardwareConfig;
+import org.firstinspires.ftc.teamcode.commands.IntakeCmds;
 import org.firstinspires.ftc.teamcode.subSystems.DriveSub;
 import org.firstinspires.ftc.teamcode.subSystems.IntakeSub;
 
-/**
- * Simple OpMode for basic drive and intake motor control
- * Uses left stick for drive and turn
- * Uses right trigger for variable intake speed (forward)
- * Left trigger can be used for reverse intake if needed
- */
+import org.firstinspires.ftc.teamcode.Utilities.pid.PIDConfig;
+import org.firstinspires.ftc.teamcode.Utilities.pid.PIDController;
+
 @TeleOp(name = "BioBuzzOpMode", group = "Examples")
-public class SimpleDriveIntake extends LinearOpMode {
+public class SimpleDriveIntake extends CommandOpMode {
 
     private HardwareConfig hm;
-    private IntakeSub intakeMotor;
-    private DriveSub drive;
+    private DriveSub driveSub;
+    private IntakeSub intakeSub;
 
     @Override
-    public void runOpMode() {
-        // Initialize hardware
+    public void initialize() {
+
         hm = new HardwareConfig();
         hm.init(hardwareMap);
 
-        intakeMotor = new IntakeSub(hm);
-        drive = new DriveSub(hm);
+        driveSub = new DriveSub(hm);
+        intakeSub = new IntakeSub(hm);
 
-        // Wait for start button
-        telemetry.addData("Status", "Initialized");
-        telemetry.update();
-        waitForStart();
+        GamepadEx gamepad = new GamepadEx(gamepad1);
 
-        // Run until the end of the match (driver presses STOP)
-        while (opModeIsActive()) {
-            // Drive using left stick
-            double leftY = -gamepad1.left_stick_y;  // Invert Y so forward is positive
-            double leftX = gamepad1.left_stick_x;   // Left/right
-            double rightX = gamepad1.right_stick_x; // Rotation
+        // Set default command for drive: field-centric control
+        driveSub.setDefaultCommand(
+                new RunCommand(
+                        () -> driveSub.drive(
+                                gamepad.getLeftX(),
+                                -gamepad.getLeftY(),
+                                gamepad.getRightX()
+                        ),
+                        driveSub
+                )
+        );
 
-            drive.drive(leftX, leftY, rightX); // Note: DriveSub.drive(xSpeed, ySpeed, rotSpeed)
+        // Intake control via D-pad
+        new GamepadButton(gamepad, GamepadKeys.Button.DPAD_UP)
+                .whileHeld(new IntakeCmds.IntakeForward(intakeSub));
 
-            // Intake motor control - right trigger for variable speed forward
-            // Left trigger for reverse (if needed)
-            double rightTrigger = gamepad1.right_trigger;
-            double leftTrigger = gamepad1.left_trigger;
-            
-            if (rightTrigger > 0.1) {
-                intakeMotor.setPower(rightTrigger);  // Variable speed forward based on trigger press
-            } else if (leftTrigger > 0.1) {
-                intakeMotor.setPower(-leftTrigger);  // Variable speed reverse
-            } else {
-                intakeMotor.setPower(0.0);  // Intake stop
-            }
+        new GamepadButton(gamepad, GamepadKeys.Button.DPAD_DOWN)
+                .whileHeld(new IntakeCmds.IntakeBackward(intakeSub));
 
-            // Telemetry
-            telemetry.addData("Status", "Running");
-            telemetry.addData("Intake Power",      String.format("%.2f", intakeMotor.getPower()));
-            telemetry.addData("Right Trigger",     String.format("%.2f", gamepad1.right_trigger));
-            telemetry.addData("Left Trigger",      String.format("%.2f", gamepad1.left_trigger));
-            telemetry.update();
-        }
+        new GamepadButton(gamepad, GamepadKeys.Button.DPAD_LEFT)
+                .whenPressed(new IntakeCmds.IntakeOff(intakeSub));
     }
 }
