@@ -27,30 +27,30 @@ public class DriveSub extends SubsystemBase {
     }
 
     public void drive(double xSpeed, double ySpeed, double rotSpeed) {
-        double heading = 0.0;
-        if (imu != null) {
-        Orientation angles = imu.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
-        heading = angles.firstAngle; // yaw in radians
-        }
-        double rotX = xSpeed * Math.cos(-heading) - ySpeed * Math.sin(-heading);
-        double rotY = xSpeed * Math.sin(-heading) + ySpeed * Math.cos(-heading);
-        double leftFrontPower = rotY + rotX + rotSpeed;
-        double rightFrontPower = rotY - rotX - rotSpeed;
-        double leftRearPower = rotY - rotX + rotSpeed;
-        double rightRearPower = rotY + rotX - rotSpeed;
-        double max = Math.max(
-            Math.max(Math.abs(leftFrontPower), Math.abs(rightFrontPower)),
-            Math.max(Math.abs(leftRearPower), Math.abs(rightRearPower))
-        );
-        if (max > 1.0) {
-            leftFrontPower /= max;
-            rightFrontPower /= max;
-            leftRearPower /= max;
-            rightRearPower /= max;
-        }
-        frontLeft.setPower(leftFrontPower);
-        frontRight.setPower(rightFrontPower);
-        rearLeft.setPower(leftRearPower);
-        rearRight.setPower(rightRearPower);
-    }
+         double heading = 0.0;
+         if (imu != null) {
+         Orientation angles = imu.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
+         heading = angles.firstAngle; // yaw in radians
+         }
+         double rotX = xSpeed * Math.cos(-heading) - ySpeed * Math.sin(-heading);
+         double rotY = xSpeed * Math.sin(-heading) - ySpeed * Math.cos(-heading); // invert ySpeed
+         double leftFrontPower = rotY + rotX + rotSpeed;
+         double rightFrontPower = rotY - rotX - rotSpeed;
+         double leftRearPower = rotY - rotX + rotSpeed;
+         double rightRearPower = rotY + rotX - rotSpeed;
+         double max = Math.max(
+             Math.max(Math.abs(leftFrontPower), Math.abs(rightFrontPower)),
+             Math.max(Math.abs(leftRearPower), Math.abs(rightRearPower))
+         );
+         if (max > 1.0) {
+             leftFrontPower /= max;
+             rightFrontPower /= max;
+             leftRearPower /= max;
+             rightRearPower /= max;
+         }
+         frontLeft.setPower(leftFrontPower);
+         frontRight.setPower(rightFrontPower);
+         rearLeft.setPower(leftRearPower);
+         rearRight.setPower(rightRearPower);
+     }
 }

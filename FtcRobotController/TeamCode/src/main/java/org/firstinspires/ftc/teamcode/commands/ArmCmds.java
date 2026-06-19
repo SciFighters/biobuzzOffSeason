@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.commands;
 
 import com.arcrobotics.ftclib.command.CommandBase;
 import org.firstinspires.ftc.teamcode.subSystems.ArmSub;
+import java.util.Objects;
 
 /**
  * Collection of commands for controlling the arm subsystem.
@@ -11,55 +12,56 @@ import org.firstinspires.ftc.teamcode.subSystems.ArmSub;
  */
 public class ArmCmds {
 
-    /**
-     * Command to set arm to a specific target position (in degrees) using PID control.
-     * Automatically calculates power adjustments to reach target angle.
-     */
-    public static class ArmSetPosition extends CommandBase {
-        private final ArmSub armSub;
-        private final double targetDegrees;
-        private static final double TOLERANCE_DEGREES = 2.0;
+public static class ArmGoToAngle extends CommandBase {
+         private  ArmSub armSub;
+         private final double targetDegrees;
+          private static final double TOLERANCE_DEGREES = 5.0;
 
-        public ArmSetPosition(ArmSub armSub, double targetDegrees) {
-            this.armSub = armSub;
-            this.targetDegrees = targetDegrees;
-            addRequirements(armSub);
-        }
+         public ArmGoToAngle(ArmSub armSub, double targetDegrees) {
+             this.armSub = Objects.requireNonNull(armSub, "armSub cannot be null");
+             this.targetDegrees = targetDegrees;
+             addRequirements(armSub);
+         }
 
-        @Override
-        public void initialize() {
-            armSub.pid.reset(); // Clear PID history to prevent windup
-        }
+         @Override
+         public void initialize() {
+             armSub.pid.reset(); // Clear PID history to prevent windup
+         }
 
-        @Override
-        public void execute() {
-            double currentAngle = armSub.getAngle();
-            double power = armSub.pid.calculate(currentAngle, targetDegrees);
-            armSub.setPower(power);
-        }
+          @Override
+          public void execute() {
+              double currentAngle = armSub.getAngle();
+              double target = targetDegrees;
+              double error = target - currentAngle;
+              double kp = 0.05; // proportional gain
+              double power = kp * error;
+              // Limit power to avoid saturation
+              if (power > 1.0) power = 1.0;
+              if (power < -1.0) power = -1.0;
+              armSub.setPower(power);
+          }
 
-        @Override
-        public boolean isFinished() {
-            double error = Math.abs(armSub.getAngle() - targetDegrees);
-            return error <= TOLERANCE_DEGREES;
-        }
+          @Override
+          public boolean isFinished() {
+              double current = armSub.getAngle();
+              double target = targetDegrees;
+              double error = Math.abs(current - target);
+              return error <= TOLERANCE_DEGREES;
+          }
 
-        @Override
-        public void end(boolean interrupted) {
-            armSub.setPower(0); // Stop motor when command completes
-        }
-    }
+         @Override
+         public void end(boolean interrupted) {
+             armSub.setPower(0); // Stop motor when command completes
+         }
+     }
 
-    /**
-     * Command to hold the arm at its current position using PID control.
-     * Maintains position indefinitely until interrupted or completed.
-     */
+
     public static class ArmHoldPosition extends CommandBase {
         private final ArmSub armSub;
         private double targetDegrees; // Current target angle
 
         public ArmHoldPosition(ArmSub armSub) {
-            this.armSub = armSub;
+            this.armSub = Objects.requireNonNull(armSub, "armSub cannot be null");
             addRequirements(armSub);
         }
 
@@ -96,7 +98,7 @@ public class ArmCmds {
         private final double power;
 
         public ArmPower(ArmSub armSub, double power) {
-            this.armSub = armSub;
+            this.armSub = Objects.requireNonNull(armSub, "armSub cannot be null");
             this.power = power;
             addRequirements(armSub);
         }
@@ -121,7 +123,7 @@ public class ArmCmds {
         private final double target;
 
         public MoveArmToPos(ArmSub armSub, double targetDeg) {
-            this.armSub = armSub;
+            this.armSub = Objects.requireNonNull(armSub, "armSub cannot be null");
             this.target = targetDeg;
             addRequirements(armSub);
         }

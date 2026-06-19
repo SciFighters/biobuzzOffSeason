@@ -1,47 +1,53 @@
 package org.firstinspires.ftc.teamcode.subSystems;
 
 import com.arcrobotics.ftclib.command.SubsystemBase;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 import org.firstinspires.ftc.teamcode.HardwareConfig;
+import org.firstinspires.ftc.teamcode.MotorOut;
+import org.firstinspires.ftc.teamcode.Utilities.pid.PIDConfig;
 
-// Lift subsystem
+
 public class LiftSub extends SubsystemBase {
 
-    private DcMotorEx leftLift;
-    private DcMotorEx rightLift;
+    private final MotorOut leftLift;
+    private final MotorOut rightLift;
+
+    
+    private static final PIDConfig NormalSpeed = new PIDConfig.Builder()
+            .name("LIFT_NORMAL")
+            .description("Standard speed for lift positioning")
+            .kp(0.08)
+            .ki(0.02)
+            .kd(0.05)
+            .tolerance(5)
+            .integralZone(10)
+            .maxIntegral(1.0)
+            .integralLeakRate(0.95)
+            .outputDeadband(0.0)
+            .errorDeadband(0.0)
+            .maxOutputChangePerSecond(0.5)
+            .build();
 
     public LiftSub(HardwareConfig hm) {
         leftLift = hm.leftLift;
         rightLift = hm.rightLift;
     }
 
-    // Set lift power
-    // @param power -1 to 1
     public void setPower(double power) {
         leftLift.setPower(power);
         rightLift.setPower(power);
     }
 
-    // Get lift power
-    // @return average power
+    
     public double getPower() {
         return (leftLift.getPower() + rightLift.getPower()) / 2.0;
     }
 
-    // Set lift position
-    // @param position target position
     public void setPosition(int position) {
-        leftLift.setTargetPosition(position);
-        rightLift.setTargetPosition(position);
-        leftLift.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-        rightLift.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        leftLift.goToPosPID(position, NormalSpeed);
+        rightLift.goToPosPID(position, NormalSpeed);
     }
 
-    // Get lift position
-    // @return average position
     public int getPosition() {
-        return (
-            (leftLift.getCurrentPosition() + rightLift.getCurrentPosition()) / 2
-        );
+        return (leftLift.getPosTicks() + rightLift.getPosTicks()) / 2;
     }
 }
