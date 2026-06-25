@@ -48,7 +48,7 @@ public class HardwareConfig {
         //rightServo = hardwareMap.get(Servo.class, "rightServo");
 
         // Intake motor
-        this.intakeMotor = new MotorOut((hardwareMap.get(DcMotorEx.class, "intakeMotor")), 146, 1150);
+        this.intakeMotor = new MotorOut((hardwareMap.get(DcMotorEx.class, "intakeMotor")), 1150);
 
 
 
@@ -60,7 +60,7 @@ public class HardwareConfig {
         // Lift motor directions
 
         // Arm motor
-        this.armMotor = new MotorOut((hardwareMap.get(DcMotorEx.class, "armMotor")), 2800, 60);
+        this.armMotor = new MotorOut((hardwareMap.get(DcMotorEx.class, "armMotor")), 60);
         // IMU
         imu = hardwareMap.get(IMU.class, "imu");
         imu.initialize(new IMU.Parameters(new RevHubOrientationOnRobot(

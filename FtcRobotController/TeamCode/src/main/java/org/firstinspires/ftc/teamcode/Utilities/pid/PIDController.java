@@ -152,10 +152,10 @@ public class PIDController {
     public double calculate(double measurement, double target) {
 
         double error = computeError(measurement, target);
-        return calculateError(error);
+        return calculateFromError(error);
     }
 
-    public double calculateError(double error) {
+    public double calculateFromError(double error) {
 
         updateTiming();
 
@@ -167,9 +167,9 @@ public class PIDController {
 
         double output = computeOutput();
 
-        output = applyOutputDeadband(output);
-        output = applySlewRate(output);
-        output = applyOutputLimits(output);
+        //output = applyOutputDeadband(output);
+        //output = applySlewRate(output);
+        //output = applyOutputLimits(output);
 
         lastOutput = output;
 
@@ -236,19 +236,20 @@ public class PIDController {
 
     private void updateIntegral() {
 
-        if (Math.abs(error) > config.integralZone) {
-            return;
+        if (Math.abs(error) <= config.integralZone) {
+            integralSum += error * dt;
+
+            integralSum *= config.integralLeakRate;
+
+            integralSum = clamp(
+                    integralSum,
+                    -config.maxIntegral,
+                    config.maxIntegral
+            );
+        } else {
+            // Outside integral zone: clear integral to prevent windup
+            integralSum = 0.0;
         }
-
-        integralSum += error * dt;
-
-        integralSum *= config.integralLeakRate;
-
-        integralSum = clamp(
-                integralSum,
-                -config.maxIntegral,
-                config.maxIntegral
-        );
     }
 
     public void resetIntegral() {
