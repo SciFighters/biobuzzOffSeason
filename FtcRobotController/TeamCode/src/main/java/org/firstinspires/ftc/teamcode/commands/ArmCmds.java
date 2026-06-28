@@ -53,7 +53,7 @@ public class ArmCmds {
         @Override
         public boolean isFinished() {
             // finished when within tolerance defined in ArmSub
-            return armSub.atTargetAngle(targetDegrees);
+            return armSub.atTargetAngle();
         }
 
         @Override

@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.subSystems;
 
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import org.firstinspires.ftc.teamcode.HardwareConfig;
-import org.firstinspires.ftc.teamcode.MotorOut;
+import org.firstinspires.ftc.teamcode.Utilities.pid.MotorOut;
 import org.firstinspires.ftc.teamcode.Utilities.pid.PIDConfig;
 import org.firstinspires.ftc.teamcode.Utilities.pid.PIDController;
 
@@ -49,8 +49,8 @@ public class LiftSub extends SubsystemBase {
         int rightPos = rightLift.getPosTicks();
         double leftError = position - leftPos;
         double rightError = position - rightPos;
-        double leftOutput = leftPID.calculateError(leftError);
-        double rightOutput = rightPID.calculateError(rightError);
+        double leftOutput = leftPID.calculateFromError(leftError);
+        double rightOutput = rightPID.calculateFromError(rightError);
         // clamp output to motor power range
         leftOutput = Math.max(-1.0, Math.min(1.0, leftOutput));
         rightOutput = Math.max(-1.0, Math.min(1.0, rightOutput));

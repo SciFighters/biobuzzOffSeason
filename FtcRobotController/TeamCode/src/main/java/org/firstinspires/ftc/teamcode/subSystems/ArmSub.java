@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.subSystems;
 
 import com.arcrobotics.ftclib.command.SubsystemBase;
-import org.firstinspires.ftc.teamcode.MotorOut;
+import org.firstinspires.ftc.teamcode.Utilities.pid.MotorOut;
 import org.firstinspires.ftc.teamcode.HardwareConfig;
 import org.firstinspires.ftc.teamcode.Utilities.pid.PIDConfig;
 import org.firstinspires.ftc.teamcode.Utilities.pid.PIDController;
@@ -101,7 +101,7 @@ public class ArmSub extends SubsystemBase {
     }
 
     /** Check if arm is at target within tolerance */
-    public boolean atTargetAngle(double targetAngleDeg) {
-        return Math.abs(getAngle() - targetAngleDeg) <= armConfig.tolerance;
+    public boolean atTargetAngle() {
+        return armPID.atTarget();
     }
 }

@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.subSystems;
 
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import org.firstinspires.ftc.teamcode.HardwareConfig;
-import org.firstinspires.ftc.teamcode.MotorOut;
+import org.firstinspires.ftc.teamcode.Utilities.pid.MotorOut;
 
 // Intake subsystem
 public class IntakeSub extends SubsystemBase {

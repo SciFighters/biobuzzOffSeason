@@ -1,14 +1,11 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import org.firstinspires.ftc.teamcode.MotorOut;
+import org.firstinspires.ftc.teamcode.Utilities.pid.MotorOut;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.IMU;
-import com.qualcomm.robotcore.hardware.IMU.Parameters;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
-import java.util.List;
 
 public class HardwareConfig {
 
@@ -48,7 +45,7 @@ public class HardwareConfig {
         //rightServo = hardwareMap.get(Servo.class, "rightServo");
 
         // Intake motor
-        this.intakeMotor = new MotorOut((hardwareMap.get(DcMotorEx.class, "intakeMotor")), 1150);
+        this.intakeMotor = new MotorOut((hardwareMap.get(DcMotorEx.class, "intakeMotor")), "RPM1150", 1);
 
 
 
@@ -60,7 +57,7 @@ public class HardwareConfig {
         // Lift motor directions
 
         // Arm motor
-        this.armMotor = new MotorOut((hardwareMap.get(DcMotorEx.class, "armMotor")), 60);
+        this.armMotor = new MotorOut((hardwareMap.get(DcMotorEx.class, "armMotor")), "RPM60", 1);
         // IMU
         imu = hardwareMap.get(IMU.class, "imu");
         imu.initialize(new IMU.Parameters(new RevHubOrientationOnRobot(
