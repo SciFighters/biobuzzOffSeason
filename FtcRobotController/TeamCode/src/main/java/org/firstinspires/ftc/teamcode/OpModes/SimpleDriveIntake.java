@@ -1,10 +1,10 @@
 package org.firstinspires.ftc.teamcode.OpModes;
 
-import com.arcrobotics.ftclib.command.CommandOpMode;
-import com.arcrobotics.ftclib.command.RunCommand;
-import com.arcrobotics.ftclib.command.button.GamepadButton;
-import com.arcrobotics.ftclib.gamepad.GamepadEx;
-import com.arcrobotics.ftclib.gamepad.GamepadKeys;
+import com.seattlesolvers.solverslib.command.CommandOpMode;
+import com.seattlesolvers.solverslib.command.RunCommand;
+import com.seattlesolvers.solverslib.gamepad.GamepadEx;
+import com.seattlesolvers.solverslib.command.button.GamepadButton;
+import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.HardwareConfig;
 import org.firstinspires.ftc.teamcode.commands.ArmCmds;
@@ -55,6 +55,8 @@ public class SimpleDriveIntake extends CommandOpMode {
 
         schedule(new RunCommand(() -> {
             telemetry.addData("Arm Angle (°)", String.format("%.1f", armSub.getAngle()));
+            telemetry.addData("Arm Power", String.format("%.1f", armSub.armMotor.getPower()));
+
 
             // Fixed type check: check the subsystem's active command, not the subsystem class itself
             if (armSub.getCurrentCommand() != null &&

@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.subSystems;
 
-import com.arcrobotics.ftclib.command.SubsystemBase;
+import com.seattlesolvers.solverslib.command.SubsystemBase;
 import org.firstinspires.ftc.teamcode.Utilities.pid.MotorOut;
 import org.firstinspires.ftc.teamcode.HardwareConfig;
 import org.firstinspires.ftc.teamcode.Utilities.pid.PIDConfig;
@@ -29,10 +29,10 @@ public class ArmSub extends SubsystemBase {
         armConfig = PIDConfig.builder()
                 .name("ARM")
                 .description("Arm position hold")
-                .kp(12.0/90)        // reduced proportional to curb overshoot
-                .ki(0.002)       // low integral
-                .kd(0.03)        // increased derivative for damping
-                .tolerance(2)    // degrees tolerance
+                .kp(0.15)
+                .ki(0.0)
+                .kd(0.0)
+                .tolerance(5)
                 .integralZone(12)
                 .maxIntegral(10)
                 .maxOutputChangePerSecond(0.6)
@@ -92,7 +92,7 @@ public class ArmSub extends SubsystemBase {
 //        output += feedforward;
 //        // Clamp output to motor power range [-1,1]
 //        output = Math.max(-1.0, Math.min(1.0, output));
-        armMotor.setPower(output);
+        setPower(output);
     }
 
     /** Reset PID integral/derivative when needed */

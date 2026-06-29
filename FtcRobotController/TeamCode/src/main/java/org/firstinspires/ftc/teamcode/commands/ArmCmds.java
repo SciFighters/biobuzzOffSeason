@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.commands;
 
-import com.arcrobotics.ftclib.command.CommandBase;
+import com.seattlesolvers.solverslib.command.CommandBase;
 import org.firstinspires.ftc.teamcode.subSystems.ArmSub;
 import java.util.Objects;
 
@@ -16,7 +16,7 @@ import java.util.Objects;
  *  The PID math is done on‑the‑spot – no external PIDController required.
  * </p>
  */
-public class ArmCmds {
+public class ArmCmds extends CommandBase {
 
     /* --------------------------------------------------------------- */
     /*  Tunable constants – adjust to match your mechanism               */

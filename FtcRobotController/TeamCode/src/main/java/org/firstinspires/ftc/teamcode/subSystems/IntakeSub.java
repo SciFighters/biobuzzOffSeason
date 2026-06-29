@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.subSystems;
 
-import com.arcrobotics.ftclib.command.SubsystemBase;
+import com.seattlesolvers.solverslib.command.SubsystemBase;
 import org.firstinspires.ftc.teamcode.HardwareConfig;
 import org.firstinspires.ftc.teamcode.Utilities.pid.MotorOut;
 
