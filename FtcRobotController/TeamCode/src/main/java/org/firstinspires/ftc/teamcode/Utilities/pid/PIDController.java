@@ -263,7 +263,7 @@ public class PIDController {
     private void updateDerivative() {
 
         double rawDerivative =
-                (error - lastError) / dt;
+                (lastError - error) / dt;
 
         filteredDerivative =
                 config.derivativeAlpha * rawDerivative
