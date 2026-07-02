@@ -8,11 +8,29 @@ buildscript {
     repositories {
         mavenCentral()
         google()
+//        maven { url "https://repo.dairy.foundation/releases" }
     }
-    dependencies {
-        // Note for FTC Teams: Do not modify this yourself.
-        classpath 'com.android.tools.build:gradle:9.2.1'
+dependencies {
+         // Note for FTC Teams: Do not modify this yourself.
+         classpath 'com.android.tools.build:gradle:8.9.1'
+//         classpath "dev.frozenmilk:Load:0.2.4"
+     }
+}
+
+configurations.all {
+    resolutionStrategy {
+        force 'ch.qos.logback:logback-classic:1.1.7'
+        force 'org.slf4j:slf4j-api:1.7.36'
+        eachDependency { details ->
+            if (details.requested.group == 'ch.qos.logback' && details.requested.name == 'logback-classic') {
+                details.useVersion '1.1.7'
+            }
+            if (details.requested.group == 'org.slf4j' && details.requested.name == 'slf4j-api') {
+                details.useVersion '1.7.36'
+            }
+        }
     }
+    exclude group: 'ch.qos.logback', module: 'logback-classic'
 }
 
 // This is now required because aapt2 has to be downloaded from the
@@ -21,6 +39,7 @@ allprojects {
     repositories {
         mavenCentral()
         google()
+        maven { url "https://jitpack.io" }
     }
 }
 

@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.subSystems;
 
-import com.arcrobotics.ftclib.command.SubsystemBase;
+import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.HardwareConfig;
 

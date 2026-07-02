@@ -252,7 +252,7 @@ public final class PIDConfig {
         private double maxOutputChangePerSecond =
                 Double.POSITIVE_INFINITY;
 
-        private Builder() {}
+        public Builder() {}
 
         /*--------------------------------------------------------------*/
         /* PROFILE INFO                                                 */

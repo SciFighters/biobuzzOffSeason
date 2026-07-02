@@ -1,139 +1,174 @@
 package org.firstinspires.ftc.teamcode.commands;
 
-import com.arcrobotics.ftclib.command.CommandBase;
+import com.seattlesolvers.solverslib.command.CommandBase;
 import org.firstinspires.ftc.teamcode.subSystems.ArmSub;
+import java.util.Objects;
 
 /**
- * Collection of commands for controlling the arm subsystem.
- * 
- * <p>All commands use PID control for precise positioning and movement.
- * Each command follows the CommandBase pattern and integrates with the ArmSub subsystem.
+ * Arm command implementations.
+ * <p>
+ *  • ArmGoToAngle – moves to an absolute angle using inline PID.
+ *  • ArmHoldPosition – holds the current angle (prevents gravity drop).
+ *  • ArmPower – one‑shot open‑loop power command.
+ *  • MoveArmToPos – legacy no‑op kept for backward compatibility.
+ * </p>
+ * <p>
+ *  The PID math is done on‑the‑spot – no external PIDController required.
+ * </p>
  */
-public class ArmCmds {
+public class ArmCmds extends CommandBase {
 
-    /**
-     * Command to set arm to a specific target position (in degrees) using PID control.
-     * Automatically calculates power adjustments to reach target angle.
-     */
-    public static class ArmSetPosition extends CommandBase {
+    /* --------------------------------------------------------------- */
+    /*  Tunable constants – adjust to match your mechanism               */
+    /* --------------------------------------------------------------- */
+    private static final double KP = 0.14;   // proportional gain
+    private static final double KI = 0.0;    // integral gain
+    private static final double KD = 0.07;   // derivative gain
+    private static final double MAX_POWER = 1.0;
+    private static final double MIN_POWER = -1.0;
+    private static final double TOLERANCE_DEGREES = 20.0;
+
+    public static class ArmGoToAngle extends CommandBase {
         private final ArmSub armSub;
         private final double targetDegrees;
-        private static final double TOLERANCE_DEGREES = 2.0;
 
-        public ArmSetPosition(ArmSub armSub, double targetDegrees) {
-            this.armSub = armSub;
+        public ArmGoToAngle(ArmSub armSub, double targetDegrees) {
+            this.armSub = Objects.requireNonNull(armSub, "armSub cannot be null");
             this.targetDegrees = targetDegrees;
             addRequirements(armSub);
         }
 
         @Override
         public void initialize() {
-            armSub.pid.reset(); // Clear PID history to prevent windup
+            // Reset PID state for a clean start
+            armSub.resetArmPID();
         }
 
         @Override
         public void execute() {
-            double currentAngle = armSub.getAngle();
-            double power = armSub.pid.calculate(currentAngle, targetDegrees);
-            armSub.setPower(power);
+            // Let ArmSub handle PID
+            armSub.setTargetAngle(targetDegrees);
         }
 
         @Override
         public boolean isFinished() {
-            double error = Math.abs(armSub.getAngle() - targetDegrees);
-            return error <= TOLERANCE_DEGREES;
+            // finished when within tolerance defined in ArmSub
+            return armSub.atTargetAngle();
         }
 
         @Override
         public void end(boolean interrupted) {
-            armSub.setPower(0); // Stop motor when command completes
+            if (!interrupted) {
+                // Hold the achieved position
+                new ArmHoldPosition(armSub, targetDegrees).schedule();
+            } else {
+                // If interrupted, stop power to avoid unexpected motion
+                armSub.setPower(0);
+            }
         }
     }
 
-    /**
-     * Command to hold the arm at its current position using PID control.
-     * Maintains position indefinitely until interrupted or completed.
-     */
+    /* --------------------------------------------------------------- */
+    /*  ArmHoldPosition – keeps the arm at its *current* angle          */
+    /* --------------------------------------------------------------- */
     public static class ArmHoldPosition extends CommandBase {
         private final ArmSub armSub;
-        private double targetDegrees; // Current target angle
+        private double targetDeg;   // angle we are trying to maintain
+        private final boolean useProvidedTarget;
 
+        /** Create a hold command that maintains the arm's current angle */
         public ArmHoldPosition(ArmSub armSub) {
-            this.armSub = armSub;
+            this.armSub = Objects.requireNonNull(armSub, "armSub cannot be null");
+            this.targetDeg = 0.0; // placeholder
+            this.useProvidedTarget = false;
+            addRequirements(armSub);
+        }
+
+        /** Create a hold command that maintains a specific angle */
+        public ArmHoldPosition(ArmSub armSub, double targetDeg) {
+            this.armSub = Objects.requireNonNull(armSub, "armSub cannot be null");
+            this.targetDeg = targetDeg;
+            this.useProvidedTarget = true;
             addRequirements(armSub);
         }
 
         @Override
         public void initialize() {
-            targetDegrees = armSub.getAngle(); // Set target to current position
-            armSub.pid.reset(); // Clear PID history
+            // If no target was provided, capture current angle
+            if (!useProvidedTarget) {
+                this.targetDeg = armSub.getAngle();
+            }
+            armSub.resetArmPID();
         }
 
         @Override
         public void execute() {
-            double currentAngle = armSub.getAngle();
-            double power = armSub.pid.calculate(currentAngle, targetDegrees);
-            armSub.setPower(power);
+            armSub.setTargetAngle(targetDeg);
         }
 
         @Override
         public boolean isFinished() {
-            return false; // Continues until interrupted
+            return false; // hold until cancelled
         }
 
         @Override
         public void end(boolean interrupted) {
-            armSub.setPower(0); // Stop motor when command ends
+            armSub.setPower(0);
         }
     }
 
-    /**
-     * Command to set arm power directly (open-loop control).
-     * Use for simple manual control without PID precision.
-     */
+    /* --------------------------------------------------------------- */
+    /*  ArmPower – one‑shot open‑loop power command for a limited time */
+    /* --------------------------------------------------------------- */
     public static class ArmPower extends CommandBase {
         private final ArmSub armSub;
         private final double power;
+        private final long finishTime; // epoch ms when the command ends
 
-        public ArmPower(ArmSub armSub, double power) {
-            this.armSub = armSub;
+        public ArmPower(ArmSub armSub, double power, long durationMs) {
+            this.armSub = Objects.requireNonNull(armSub, "armSub cannot be null");
             this.power = power;
+            this.finishTime = System.currentTimeMillis() + durationMs;
             addRequirements(armSub);
         }
 
         @Override
         public void initialize() {
-            armSub.setPower(power); // Set immediate power level
+            armSub.setPower(power);
         }
 
         @Override
         public boolean isFinished() {
-            return true; // One-shot command
+            return System.currentTimeMillis() >= finishTime;
+        }
+
+        @Override
+        public void end(boolean interrupted) {
+            armSub.setPower(0);
         }
     }
 
-    /**
-     * Command to move arm to a specific position using PID.
-     * *Deprecated in favor of ArmSetPosition - use ArmSetPosition instead.*
-     */
+    /* --------------------------------------------------------------- */
+    /*  MoveArmToPos – legacy placeholder (does nothing)                */
+    /* --------------------------------------------------------------- */
     public static class MoveArmToPos extends CommandBase {
         private final ArmSub armSub;
-        private final double target;
+        private final double targetDeg;
 
         public MoveArmToPos(ArmSub armSub, double targetDeg) {
-            this.armSub = armSub;
-            this.target = targetDeg;
+            this.armSub = Objects.requireNonNull(armSub, "armSub cannot be null");
+            this.targetDeg = targetDeg;
             addRequirements(armSub);
         }
 
         @Override
         public void execute() {
-            // Deprecated implementation - continues execution
+            // Reserved for legacy code; does nothing.
         }
 
         @Override
         public boolean isFinished() {
-            return false; // Never finishes
+            return false;
         }
     }
 }

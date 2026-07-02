@@ -1,13 +1,13 @@
 package org.firstinspires.ftc.teamcode.subSystems;
 
-import com.arcrobotics.ftclib.command.SubsystemBase;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.seattlesolvers.solverslib.command.SubsystemBase;
 import org.firstinspires.ftc.teamcode.HardwareConfig;
+import org.firstinspires.ftc.teamcode.Utilities.MotorOut;
 
 // Intake subsystem
 public class IntakeSub extends SubsystemBase {
 
-    private DcMotorEx intakeMotor ;
+    private MotorOut intakeMotor ;
 
     public IntakeSub(HardwareConfig hm) {
 
