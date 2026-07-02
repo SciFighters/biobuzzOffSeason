@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Utilities.pid;
+package org.firstinspires.ftc.teamcode.Utilities;
 
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import org.jetbrains.annotations.NotNull;
@@ -20,10 +20,10 @@ public class MotorOut {
       * ONLY the desired output RPM is required.
       * Gear ratio and tick counts are derived automatically.
       */
-     public MotorOut(@NotNull DcMotorEx motor, String planeteryRPM, double systemGearRatio) {
+     public MotorOut(@NotNull DcMotorEx motor, GobildaPlanetery planetary, double systemGearRatio) {
          this.motor = motor;
          this.systemGearRatio = systemGearRatio;
-         this.planetaryRatio = GobildaPlanetery.toRatio(planeteryRPM);
+         this.planetaryRatio = planetary.ratio;
          totalGearRatio = systemGearRatio * this.planetaryRatio;
          ticksPerRevolutionOut = (int) Math.round(ticksPerRevolutionBare * totalGearRatio);
      }

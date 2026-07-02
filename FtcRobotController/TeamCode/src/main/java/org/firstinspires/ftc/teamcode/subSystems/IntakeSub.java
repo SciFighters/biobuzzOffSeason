@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.subSystems;
 
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import org.firstinspires.ftc.teamcode.HardwareConfig;
-import org.firstinspires.ftc.teamcode.Utilities.pid.MotorOut;
+import org.firstinspires.ftc.teamcode.Utilities.MotorOut;
 
 // Intake subsystem
 public class IntakeSub extends SubsystemBase {

@@ -1,18 +1,18 @@
 package org.firstinspires.ftc.teamcode.subSystems;
 
+import com.arcrobotics.ftclib.controller.PIDFController;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
-import org.firstinspires.ftc.teamcode.Utilities.pid.MotorOut;
+import org.firstinspires.ftc.teamcode.Utilities.MotorOut;
 import org.firstinspires.ftc.teamcode.HardwareConfig;
-import org.firstinspires.ftc.teamcode.Utilities.pid.PIDConfig;
-import org.firstinspires.ftc.teamcode.Utilities.pid.PIDController;
 
 public class ArmSub extends SubsystemBase {
     public MotorOut armMotor;
-    private final PIDController armPID;
-    private final PIDConfig armConfig;
+    private final PIDFController armPID = new PIDFController(0.03, 0, 1e-3, 0);
+
 
     Double startAngle = 90.0;       // start angle
     public ArmSub(HardwareConfig hm) {
+        armPID.setTolerance(5);
         if (hm == null) {
             throw new IllegalArgumentException("HardwareConfig cannot be null");
         }
@@ -24,20 +24,6 @@ public class ArmSub extends SubsystemBase {
         // Set startAngle so that getAngle() returns 90 at initial position
         double raw = armMotor.getPosAngle();
         startAngle = raw - 90.0;
-
-        // PID config for arm (tuned for less overshoot)
-        armConfig = PIDConfig.builder()
-                .name("ARM")
-                .description("Arm position hold")
-                .kp(0.15)
-                .ki(0.0)
-                .kd(0.0)
-                .tolerance(5)
-                .integralZone(12)
-                .maxIntegral(10)
-                .maxOutputChangePerSecond(0.6)
-                .build();
-        armPID = new PIDController(armConfig);
     }
 
     public void setPower(double p) {
@@ -102,6 +88,6 @@ public class ArmSub extends SubsystemBase {
 
     /** Check if arm is at target within tolerance */
     public boolean atTargetAngle() {
-        return armPID.atTarget();
+        return armPID.atSetPoint();
     }
 }
