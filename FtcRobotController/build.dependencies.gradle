@@ -4,6 +4,7 @@ repositories {
     maven {
         url "https://jitpack.io"
     }
+    maven { url = "https://mymaven.bylazar.com/releases" }
 } 
 
 configurations.all {
@@ -29,4 +30,8 @@ dependencies {
 //        exclude group: 'commons-logging', module: 'commons-logging'
 //        exclude group: 'org.slf4j', module: 'slf4j-api'
 //    }
+    implementation 'com.pedropathing:ftc:2.1.2'
+    implementation 'com.pedropathing:telemetry:1.0.0'
+
+    implementation 'com.bylazar:fullpanels:1.0.12'
 }
