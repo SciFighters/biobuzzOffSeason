@@ -1,13 +1,14 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-
-import org.firstinspires.ftc.teamcode.Utilities.GobildaPlanetery;
-import org.firstinspires.ftc.teamcode.Utilities.MotorOut;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.IMU;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.teamcode.Utilities.GobildaPlanetery;
+import org.firstinspires.ftc.teamcode.Utilities.MotorOut;
 
 public class HardwareConfig {
 
@@ -21,7 +22,7 @@ public class HardwareConfig {
     public MotorOut leftLift;
     public MotorOut rightLift;
     public MotorOut armMotor;
-    public IMU imu;
+    public GoBildaPinpointDriver pinpoint;
 
     public void init(HardwareMap hardwareMap) {
         // Drive motors
@@ -49,21 +50,31 @@ public class HardwareConfig {
         // Intake motor
         this.intakeMotor = new MotorOut((hardwareMap.get(DcMotorEx.class, "intakeMotor")), GobildaPlanetery.RPM1150, 1);
 
-
-
-
          // Lift motors
          //this.leftLift = new MotorOut((hardwareMap.get(DcMotorEx.class, "leftLift")), 168, 1000);
          //this.rightLift = new MotorOut((hardwareMap.get(DcMotorEx.class, "rightLift")), 168, 1000);
 
-        // Lift motor directions
-
         // Arm motor
         this.armMotor = new MotorOut((hardwareMap.get(DcMotorEx.class, "armMotor")), GobildaPlanetery.RPM60, 1);
-        // IMU
-        imu = hardwareMap.get(IMU.class, "imu");
-        imu.initialize(new IMU.Parameters(new RevHubOrientationOnRobot(
-                RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                RevHubOrientationOnRobot.UsbFacingDirection.LEFT)));
+
+        // goBilda Pinpoint IMU + odometry
+        pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
+        configurePinpoint();
+    }
+
+    /** tune offsets/directions per robot build */
+    private void configurePinpoint() {
+        // odometry pod offsets (mm) relative to tracking point
+        pinpoint.setOffsets(-84.0, -168.0, DistanceUnit.MM);
+        // goBilda 4-bar pods
+        pinpoint.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
+        // both pods count forward
+        pinpoint.setEncoderDirections(
+            GoBildaPinpointDriver.EncoderDirection.FORWARD,
+            GoBildaPinpointDriver.EncoderDirection.FORWARD
+        );
+        // start at origin, heading 0
+        pinpoint.setPosition(new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0));
+        pinpoint.resetPosAndIMU();
     }
 }
