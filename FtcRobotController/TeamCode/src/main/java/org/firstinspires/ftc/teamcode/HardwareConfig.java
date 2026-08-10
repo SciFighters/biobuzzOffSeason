@@ -51,8 +51,9 @@ public class HardwareConfig {
         this.intakeMotor = new MotorOut((hardwareMap.get(DcMotorEx.class, "intakeMotor")), GobildaPlanetery.RPM1150, 1);
 
          // Lift motors
-         //this.leftLift = new MotorOut((hardwareMap.get(DcMotorEx.class, "leftLift")), 168, 1000);
-         //this.rightLift = new MotorOut((hardwareMap.get(DcMotorEx.class, "rightLift")), 168, 1000);
+         this.leftLift = new MotorOut((hardwareMap.get(DcMotorEx.class, "leftLift")), GobildaPlanetery.RPM312, 1000);
+         this.rightLift = new MotorOut((hardwareMap.get(DcMotorEx.class, "rightLift")), GobildaPlanetery.RPM312, 1000);
+
 
         // Arm motor
         this.armMotor = new MotorOut((hardwareMap.get(DcMotorEx.class, "armMotor")), GobildaPlanetery.RPM60, 1);
