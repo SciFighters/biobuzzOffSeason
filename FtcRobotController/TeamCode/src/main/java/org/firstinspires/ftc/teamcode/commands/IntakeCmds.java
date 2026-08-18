@@ -3,83 +3,60 @@ package org.firstinspires.ftc.teamcode.commands;
 import com.seattlesolvers.solverslib.command.CommandBase;
 import org.firstinspires.ftc.teamcode.subSystems.IntakeSub;
 
-
-/**
- * Collection of commands that control the intake mechanism.
- * 
- * <p>Each inner class represents a specific command that can be scheduled 
- * to set the intake motor power in various directions.
- */
 public class IntakeCmds {
 
-    /**
-     * Command to spin the intake forward.
-     * This sets the intake motor power to 1.0 (full forward).
-     */
-    public static class IntakeForward extends CommandBase {
+    public static class Intake extends CommandBase {
 
         private final IntakeSub intake;
 
-        public IntakeForward(IntakeSub intake) {
+        public IntakeForward(IntakeSub intake, boolean button) {
             this.intake = intake;
             addRequirements(intake);
         }
 
         @Override
-        public void initialize() {
-            // Spin intake forward
+        public void execute() {
+            // uncalibrated value
             intake.setPower(1.0);
         }
 
         @Override
         public boolean isFinished() {
-            // Command completes immediately
-            return true;
+            return !button;
         }
     }
 
-    /**
-     * Command to spin the intake backward.
-     * This sets the intake motor power to -1.0 (full reverse).
-     */
-    public static class IntakeBackward extends CommandBase {
+    public static class IntakeEject extends CommandBase {
 
         private final IntakeSub intake;
 
-        public IntakeBackward(IntakeSub intake) {
+        public IntakeEject(IntakeSub intake, boolean button) {
             this.intake = intake;
             addRequirements(intake);
         }
 
         @Override
-        public void initialize() {
-            // Spin intake backward
+        public void execute() {
             intake.setPower(-1.0);
         }
 
         @Override
         public boolean isFinished() {
-            // Command completes immediately
-            return true;
+            return !button;
         }
     }
 
-    /**
-     * Command to stop the intake.
-     * This sets the intake motor power to 0.0 (off).
-     */
-    public static class IntakeOff extends CommandBase {
+    public static class IdleIntake extends CommandBase {
 
         private final IntakeSub intake;
 
-        public IntakeOff(IntakeSub intake) {
+        public IdleIntake(IntakeSub intake) {
             this.intake = intake;
             addRequirements(intake);
         }
 
         @Override
         public void initialize() {
-            // Stop intake motor
             intake.setPower(0.0);
         }
 
