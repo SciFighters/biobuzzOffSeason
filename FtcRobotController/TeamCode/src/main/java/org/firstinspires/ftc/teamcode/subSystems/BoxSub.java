@@ -15,27 +15,12 @@ public class BoxSub extends SubsystemBase {
         rightServo = hm.rightServo;
     }
 
-    // Set left servo position
-    // @param position 0.0 to 1.0
-    public void setLeftServoPosition(double position) {
-        leftServo.setPosition(position);
+    public double getServosPosition() {
+        return new double[] {leftServo.getPosition(), rightServo.getPosition};
     }
 
-    // Get left servo position
-    // @return current position
-    public double getLeftServoPosition() {
-        return leftServo.getPosition();
-    }
-
-    // Set right servo position
-    // @param position 0.0 to 1.0
-    public void setRightServoPosition(double position) {
-        rightServo.setPosition(position);
-    }
-
-    // Get right servo position
-    // @return current position
-    public double getRightServoPosition() {
-        return rightServo.getPosition();
+    public void setServosPosition(double pos) {
+        rightServo.setPosition(pos);
+        leftServo.setPosition(pos)
     }
 }

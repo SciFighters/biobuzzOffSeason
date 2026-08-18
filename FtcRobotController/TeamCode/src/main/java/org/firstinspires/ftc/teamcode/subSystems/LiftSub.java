@@ -13,7 +13,10 @@ public class LiftSub extends SubsystemBase {
     double spoolRadius;
     public MotorOut rightMotor;
     public MotorOut leftMotor;
-    private final PIDFController liftPID = new PIDFController(0.03, 0, 1e-3, 0); // not configured
+    
+    // uncalibrated value
+    private final PIDFController liftPID = new PIDFController(0.03, 0, 1e-3, 0); 
+
 
 
     Double startHeight = 0.0;
