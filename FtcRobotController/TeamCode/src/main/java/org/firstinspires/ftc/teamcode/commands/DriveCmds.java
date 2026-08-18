@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.commands;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import com.seattlesolvers.solverslib.command.CommandBase;
 import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
+import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import org.firstinspires.ftc.teamcode.subSystems.DriveSub;
 
 /**
@@ -160,7 +161,6 @@ public final class DriveCmds {
         }
     }
 
-    /** Pause for milliseconds. */
     public static class Wait extends CommandBase {
         private final long ms;
         private long startTime;
@@ -180,21 +180,41 @@ public final class DriveCmds {
         }
     }
 
-    /** Build the full TestAuto sequence. */
     public static SequentialCommandGroup testAutoSequence(DriveSub drive) {
         return new SequentialCommandGroup(
-            new ResetPose(drive),
-            new TranslateTo(drive, 0.0, 600.0, 0.45, 4000),   // drive to center
-            new Wait(200),
-            new Rotate(drive, 2.0 * Math.PI, 0.40),            // spin 360
-            new Wait(200),
-            new TranslateTo(drive, 0.0, 1100.0, 0.45, 3000),   // forward 50cm
-            new Wait(200),
-            new TranslateTo(drive, 0.0, 100.0, 0.45, 3000),    // back 50cm
-            new Wait(200),
-            new TranslateTo(drive, 0.0, 1100.0, 0.45, 3000),   // forward 50cm
-            new Wait(200),
-            new TranslateTo(drive, 0.0, 100.0, 0.45, 3000)      // back 50cm
+                new ResetPose(drive),
+                new TranslateTo(drive, 0.0, 600.0, 0.45, 4000),   // drive to center
+                new Wait(200),
+                new Rotate(drive, 2.0 * Math.PI, 0.40),            // spin 360
+                new Wait(200),
+                new TranslateTo(drive, 0.0, 1100.0, 0.45, 3000),   // forward 50cm
+                new Wait(200),
+                new TranslateTo(drive, 0.0, 100.0, 0.45, 3000),    // back 50cm
+                new Wait(200),
+                new TranslateTo(drive, 0.0, 1100.0, 0.45, 3000),   // forward 50cm
+                new Wait(200),
+                new TranslateTo(drive, 0.0, 100.0, 0.45, 3000)      // back 50cm
         );
+    }
+
+    /** Teleop tank/arcade drive using gamepad sticks. */
+    public static class TeleopDrive extends CommandBase {
+        private final DriveSub drive;
+        private final GamepadEx gamepad;
+
+        public TeleopDrive(DriveSub drive, GamepadEx gamepad) {
+            this.drive = drive;
+            this.gamepad = gamepad;
+            addRequirements(drive);
+        }
+
+        @Override
+        public void execute() {
+            drive.drive(
+                    gamepad.getLeftX(),
+                    gamepad.getLeftY(),
+                    gamepad.getRightX()
+            );
+        }
     }
 }
