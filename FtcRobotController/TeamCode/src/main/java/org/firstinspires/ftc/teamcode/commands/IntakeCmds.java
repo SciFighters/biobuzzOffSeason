@@ -4,12 +4,13 @@ import com.seattlesolvers.solverslib.command.CommandBase;
 import org.firstinspires.ftc.teamcode.subSystems.IntakeSub;
 
 public class IntakeCmds {
+    static boolean button;
 
     public static class Intake extends CommandBase {
 
         private final IntakeSub intake;
 
-        public IntakeForward(IntakeSub intake, boolean button) {
+        public Intake(IntakeSub intake, boolean button) {
             this.intake = intake;
             addRequirements(intake);
         }

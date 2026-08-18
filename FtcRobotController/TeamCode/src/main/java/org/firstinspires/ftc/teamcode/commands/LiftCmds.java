@@ -6,26 +6,25 @@ import java.util.Objects;
 
 public class LiftCmds {
 
-    private static final double toleranceMm= 1.0;
 
-    public static class GoToHeight extends CommandBase {
+    public static class LiftGoToHeight extends CommandBase {
         private final LiftSub liftSub;
-        private final double targetHeight;
+        private final double targetHeightM;
 
-        public GoToHeight(LiftSub liftSub, double targetHeight) {
+        public LiftGoToHeight(LiftSub liftSub, double targetHeightM) {
             this.liftSub = Objects.requireNonNull(liftSub, "liftSub cannot be null");
-            this.targetHeight = targetHeight;
+            this.targetHeightM = targetHeightM;
             addRequirements(liftSub);
         }
 
         @Override
         public void initialize() {
-            liftSub.resetArmPID();
+            liftSub.resetLiftPID();
         }
 
         @Override
         public void execute() {
-            liftSub.powerToTargetHeight(targetHeight);
+            liftSub.goToHeight(targetHeightM);
         }
 
         @Override
@@ -36,50 +35,36 @@ public class LiftCmds {
         @Override
         public void end(boolean interrupted) {
             if (!interrupted) {
-                new LiftHoldHeight(liftSub, targetHeight).schedule();
-            } else {
-                liftSub.setPower(0);
+                new LiftHoldPosition(liftSub).schedule();
             }
         }
     }
 
-    public static class HoldHeight extends CommandBase {
+    public static class LiftHoldPosition extends CommandBase {
         private final LiftSub liftSub;
-        private double targetHeight;
-        private final boolean useProvidedTarget;
+        private double targetHeightMm;
+        double current;
 
-        // Create a hold command that maintains the lift's current height
-        public LiftHoldHeight(LiftSub liftSub) {
+        public LiftHoldPosition(LiftSub liftSub) {
             this.liftSub = Objects.requireNonNull(liftSub, "liftSub cannot be null");
-            this.targetHeight = 0.0;
-            this.useProvidedTarget = false;
+            this.current = liftSub.getHeightAvg();
             addRequirements(liftSub);
         }
 
-        //Create a hold command that maintains a specific height (mm)
-        public LiftHoldHeight(LiftSub liftSub, double targetHeight) {
-            this.liftSub = Objects.requireNonNull(liftSub, "liftSub cannot be null");
-            this.targetHeight = targetHeight;
-            this.useProvidedTarget = true;
-            addRequirements(liftSub);
-        }
 
         @Override
         public void initialize() {
-            if (!useProvidedTarget) {
-                this.targetHeight = liftSub.getHeightAvg();
-            }
-            liftSub.resetArmPID();
+            liftSub.resetLiftPID();
         }
 
         @Override
         public void execute() {
-            liftSub.powerToTargetHeight(targetHeight);
+            liftSub.setPower(0);
         }
 
         @Override
         public boolean isFinished() {
-            return false; // hold until cancelled
+            return false; // hold until canceled
         }
 
         @Override
