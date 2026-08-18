@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Utilities;
 
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import org.jetbrains.annotations.NotNull;
 
@@ -20,6 +21,7 @@ public class MotorOut {
          this.planetaryRatio = planetary.ratio;
          totalGearRatio = systemGearRatio * this.planetaryRatio;
          ticksPerRevolutionOut = (int) Math.round(ticksPerRevolutionBare * totalGearRatio);
+         motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
      }
 
      public void setPower(double power) {
@@ -66,9 +68,6 @@ public class MotorOut {
          return ticksPerRevolutionBare * totalGearRatio;
      }
 
-    public double getRadius() {
-        return radius;
-    }
 
     public void resetEncoder() {
          motor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);

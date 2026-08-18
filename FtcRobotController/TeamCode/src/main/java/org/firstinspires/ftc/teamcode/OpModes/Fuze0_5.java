@@ -8,21 +8,25 @@ import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.HardwareConfig;
 
+import org.firstinspires.ftc.teamcode.commands.BoxCmds;
+import org.firstinspires.ftc.teamcode.commands.IntakeCmds;
+import org.firstinspires.ftc.teamcode.commands.LiftCmds;
+import org.firstinspires.ftc.teamcode.commands.DriveCmds;
 import org.firstinspires.ftc.teamcode.subSystems.DriveSub;
 import org.firstinspires.ftc.teamcode.subSystems.IntakeSub;
 import org.firstinspires.ftc.teamcode.subSystems.LiftSub;
 import org.firstinspires.ftc.teamcode.subSystems.BoxSub;
 
 @TeleOp(name = "Fuze 0.5", group = "Fuze")
-public class SimpleDriveIntake extends CommandOpMode {
+public class Fuze0_5 extends CommandOpMode {
 
     private HardwareConfig hm;
-    
+
     private DriveSub driveSub;
     private IntakeSub intakeSub;
     private LiftSub liftSub;
     private BoxSub boxSub;
-    
+
     private GamepadEx gamepad;
 
     @Override
@@ -34,40 +38,30 @@ public class SimpleDriveIntake extends CommandOpMode {
         intakeSub = new IntakeSub(hm);
         liftSub = new LiftSub(hm);
         boxSub = new BoxSub(hm);
-        
+
         this.gamepad = new GamepadEx(gamepad1);
 
-        liftSub.setDefaultCommand(new LiftCmds.holdHeight(liftSub));
+        liftSub.setDefaultCommand(new LiftCmds.LiftHoldPosition(liftSub));
+        intakeSub.setDefaultCommand(new IntakeCmds.IdleIntake(intakeSub));
+        boxSub.setDefaultCommand(new BoxCmds.Close(boxSub));
 
-        driveSub.setDefaultCommand(
-                new RunCommand(
-                        () -> driveSub.drive(
-                                gamepad.getLeftX(),
-                                gamepad.getLeftY(),
-                                gamepad.getRightX()
-                        ),
-                        driveSub
-                )
-        );
+        driveSub.setDefaultCommand(new DriveCmds.TeleopDrive(driveSub, gamepad));
 
         new GamepadButton(gamepad, GamepadKeys.Button.DPAD_UP)
-                .whenPressed(new ArmCmds.ArmGoToAngle(armSub, 90.0));
+                .whenPressed(new LiftCmds.LiftGoToHeight(liftSub, 0.1));
 
         new GamepadButton(gamepad, GamepadKeys.Button.DPAD_LEFT)
-                .whenPressed(new ArmCmds.ArmGoToAngle(armSub, 0.0));
+                .whenPressed(new LiftCmds.LiftGoToHeight(liftSub, 0.2));
 
         new GamepadButton(gamepad, GamepadKeys.Button.DPAD_RIGHT)
-                .whenPressed(new ArmCmds.ArmGoToAngle(armSub, 180.0));
+                .whenPressed(new LiftCmds.LiftGoToHeight(liftSub, 0.3));
 
         schedule(new RunCommand(() -> {
-            telemetry.addData("Arm Angle (°)", String.format("%.1f", armSub.getAngle()));
-            telemetry.addData("Arm Power", String.format("%.1f", armSub.armMotor.getPower()));
+            telemetry.addData("Arm Height (mm)", String.format("%.1f", liftSub.getHeightAvg()));
+            telemetry.addData("Arm Power", String.format("%.1f", liftSub.getPower()[0]));
 
-
-            // Fixed type check: check the subsystem's active command, not the subsystem class itself
-            if (armSub.getCurrentCommand() != null &&
-                    armSub.getCurrentCommand().getClass().getSimpleName().equals("ArmGoToAngle")) {
-                telemetry.addData("Arm Target (°)", "set via DPAD");
+            if (liftSub.atTargetHeight()) {
+                telemetry.addData("Arm Target", "set via DPAD");
             }
             telemetry.update();
         }));

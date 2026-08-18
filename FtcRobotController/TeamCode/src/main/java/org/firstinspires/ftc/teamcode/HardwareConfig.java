@@ -44,8 +44,8 @@ public class HardwareConfig {
         rearRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
 
         // Box servos
-        //leftServo = hardwareMap.get(Servo.class, "leftServo");
-        //rightServo = hardwareMap.get(Servo.class, "rightServo");
+        leftServo = hardwareMap.get(Servo.class, "leftServo");
+        rightServo = hardwareMap.get(Servo.class, "rightServo");
 
         // Intake motor
         this.intakeMotor = new MotorOut((hardwareMap.get(DcMotorEx.class, "intakeMotor")), GobildaPlanetery.RPM1150, 1);
