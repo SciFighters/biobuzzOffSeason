@@ -43,7 +43,7 @@ public class LiftCmds {
         }
     }
 
-    public static class LiftHoldHeight extends CommandBase {
+    public static class HoldHeight extends CommandBase {
         private final LiftSub liftSub;
         private double targetHeight;
         private final boolean useProvidedTarget;
