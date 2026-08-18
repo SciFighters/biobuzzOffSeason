@@ -4,11 +4,11 @@ import com.seattlesolvers.solverslib.command.CommandBase;
 import org.firstinspires.ftc.teamcode.subSystems.BoxSub;
 
 public class BoxCmds {
-    
+    static boolean isBoxOpen;
+
     public static class Discharge extends CommandBase {
 
         private final BoxSub box;
-        boolean isBoxOpen;
 
         public Discharge(BoxSub box) {
             this.box = box;
@@ -19,14 +19,18 @@ public class BoxCmds {
         public void initialize() {
             // Open both servos fully
             // uncalibrated value
-            box.setLeftServoPosition(1.0);
-            box.setRightServoPosition(1.0);
+            box.setServosPosition(1.0);
         }
 
         @Override
         public boolean isFinished() {
             return true;
+        }
+
+        @Override
+        public void end(boolean interrupted) {
             isBoxOpen = true; // for control
+
         }
     }
 
@@ -43,15 +47,19 @@ public class BoxCmds {
         public void initialize() {
             // Close both servos fully
             // uncalibrated value
-            box.setLeftServoPosition(0.0);
-            box.setRightServoPosition(0.0);
+            box.setServosPosition(0.0);
+
         }
 
         @Override
         public boolean isFinished() {
-            // Command completes immediately
             return true;
+        }
+
+        @Override
+        public void end(boolean interrupted) {
             isBoxOpen = false; // for control
+
         }
     }
 }
