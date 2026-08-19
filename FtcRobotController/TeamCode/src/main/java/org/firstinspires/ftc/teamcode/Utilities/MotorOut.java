@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Utilities;
 
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import org.jetbrains.annotations.NotNull;
 
@@ -7,25 +8,20 @@ import org.jetbrains.annotations.NotNull;
 
 public class MotorOut {
     @NotNull public final DcMotorEx motor;
-    private static final int DEFAULT_RPM = 6000;
-    private static final int ticksPerRevolutionBare = 28; // motor's native encoder ticks per rev
-    private final double planetaryRatio;          // Desired output RPM
+    public static final int ticksPerRevolutionBare = 28; // native ticks/rev
+    private final double planetaryRatio; // planetary gear ratio
     private double systemGearRatio;
-    private double totalGearRatio;
-    private int ticksPerRevolutionOut; // effective ticks per rev at output after gearing
+    private final double totalGearRatio;
+    private int ticksPerRevolutionOut; // effective ticks/rev at output
+    private double radius;
 
-// No internal PID state; use external PIDController if needed.
-
-     /**
-      * ONLY the desired output RPM is required.
-      * Gear ratio and tick counts are derived automatically.
-      */
      public MotorOut(@NotNull DcMotorEx motor, GobildaPlanetery planetary, double systemGearRatio) {
          this.motor = motor;
          this.systemGearRatio = systemGearRatio;
          this.planetaryRatio = planetary.ratio;
          totalGearRatio = systemGearRatio * this.planetaryRatio;
          ticksPerRevolutionOut = (int) Math.round(ticksPerRevolutionBare * totalGearRatio);
+         motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
      }
 
      public void setPower(double power) {
@@ -35,7 +31,6 @@ public class MotorOut {
      public int getPosTicks() {
          return motor.getCurrentPosition();
      }
-
 
      public double getPosAngle() {
          return (double) ticksToDegrees(getPosTicks());
@@ -49,13 +44,9 @@ public class MotorOut {
          return ticksToDegrees(getVelocity());
      }
 
-     private double ticksToDegrees(int ticks) {
-         return ticksToDegrees((double) ticks);
+     private double ticksToDegrees(double ticks) {
+         return (ticks / ticksPerRevolutionOut) * 360.0;
      }
-
-    private double ticksToDegrees(double ticks) {
-        return (ticks / ticksPerRevolutionOut) * 360.0;
-    }
 
      public double getMotorRPM() {
          return (motor.getVelocity() * 60.0) / ticksPerRevolutionBare;
@@ -66,14 +57,19 @@ public class MotorOut {
      }
 
      public double getRatio() {
-         return planetaryRatio / (double) DEFAULT_RPM;
+         return totalGearRatio;
      }
 
      public double getPower() {
          return motor.getPower();
      }
 
-     public void resetEncoder() {
+     public double ticksPerRevolution() {
+         return ticksPerRevolutionBare * totalGearRatio;
+     }
+
+
+    public void resetEncoder() {
          motor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
          try {
              Thread.sleep(250);

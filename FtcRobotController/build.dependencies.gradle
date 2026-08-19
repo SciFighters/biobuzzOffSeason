@@ -1,9 +1,9 @@
 repositories {
     mavenCentral()
     google() // Needed for androidx
-    maven {
-        url "https://jitpack.io"
-    }
+    maven { url "https://jitpack.io" }
+    maven { url = "https://mymaven.bylazar.com/releases" }
+    maven { url = 'https://maven.brott.dev/' }
 } 
 
 configurations.all {
@@ -29,4 +29,9 @@ dependencies {
 //        exclude group: 'commons-logging', module: 'commons-logging'
 //        exclude group: 'org.slf4j', module: 'slf4j-api'
 //    }
+    implementation 'com.pedropathing:ftc:2.1.2'
+    implementation 'com.pedropathing:telemetry:1.0.0'
+
+    implementation 'com.bylazar:fullpanels:1.0.12'
+    implementation 'com.acmerobotics.dashboard:dashboard:0.6.0'
 }

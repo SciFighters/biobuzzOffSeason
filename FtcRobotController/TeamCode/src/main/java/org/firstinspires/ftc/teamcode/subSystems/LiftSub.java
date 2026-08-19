@@ -1,78 +1,72 @@
 package org.firstinspires.ftc.teamcode.subSystems;
 
+import com.arcrobotics.ftclib.controller.PIDFController;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import org.firstinspires.ftc.teamcode.HardwareConfig;
 import org.firstinspires.ftc.teamcode.Utilities.MotorOut;
-import org.firstinspires.ftc.teamcode.Utilities.pid.PIDConfig;
-import org.firstinspires.ftc.teamcode.Utilities.pid.PIDController;
 
 public class LiftSub extends SubsystemBase {
+    public MotorOut rightMotor;
+    public MotorOut leftMotor;
 
-    private final MotorOut leftLift;
-    private final MotorOut rightLift;
-    private final PIDController leftPID;
-    private final PIDController rightPID;
+    double radiusM;
+    private static final double toleranceM = 0.1;
 
-    private static final PIDConfig NormalSpeed = new PIDConfig.Builder()
-            .name("LIFT_NORMAL")
-            .description("Standard speed for lift positioning")
-            .kp(0.08)
-            .ki(0.02)
-            .kd(0.05)
-            .tolerance(5)
-            .integralZone(10)
-            .maxIntegral(1.0)
-            .integralLeakRate(0.95)
-            .outputDeadband(0.0)
-            .errorDeadband(0.0)
-            .maxOutputChangePerSecond(0.5)
-            .build();
+
+
+    private final PIDFController liftPID = new PIDFController(0.03, 0, 1e-3, 0); //uncalibrated
+
 
     public LiftSub(HardwareConfig hm) {
-        leftLift = hm.leftLift;
-        rightLift = hm.rightLift;
-        leftPID = new PIDController(NormalSpeed);
-        rightPID = new PIDController(NormalSpeed);
+        liftPID.setTolerance(toleranceM);
+        rightMotor = hm.rightLift;
+        leftMotor = hm.leftLift;
     }
 
-    public void setPower(double power) {
-        leftLift.setPower(power);
-        rightLift.setPower(power);
+    public void setPower(double p) {
+        rightMotor.setPower(p);
+        leftMotor.setPower(p);
     }
 
-    public double getPower() {
-        return (leftLift.getPower() + rightLift.getPower()) / 2.0;
+    public double[] getPower() {
+        return new double[] {rightMotor.getPower(), leftMotor.getPower()};
     }
 
-    public void setPosition(int position) {
-        int leftPos = leftLift.getPosTicks();
-        int rightPos = rightLift.getPosTicks();
-        double leftError = position - leftPos;
-        double rightError = position - rightPos;
-        double leftOutput = leftPID.calculateFromError(leftError);
-        double rightOutput = rightPID.calculateFromError(rightError);
-        // clamp output to motor power range
-        leftOutput = Math.max(-1.0, Math.min(1.0, leftOutput));
-        rightOutput = Math.max(-1.0, Math.min(1.0, rightOutput));
-        leftLift.setPower(leftOutput);
-        rightLift.setPower(rightOutput);
+    public int[] getPos() {
+        return new int[] {rightMotor.getPosTicks(), leftMotor.getPosTicks()};
     }
 
-    public int getPosition() {
-        return (leftLift.getPosTicks() + rightLift.getPosTicks()) / 2;
+    public double[] getHeight() {
+        double rightHeight = getPos()[0] * 2 * Math.PI * radiusM
+                / rightMotor.ticksPerRevolution();
+
+        double leftHeight = getPos()[1]  * 2 * Math.PI * radiusM
+                / leftMotor.ticksPerRevolution();
+
+        // Value in Meters
+        return new double[] { rightHeight, leftHeight };
     }
 
-    /** Reset PID controllers (call when needed) */
+    public double getHeightAvg() {
+        double[] h = getHeight();
+        return (h[0] + h[1]) / 2.0;
+    }
+
+    public boolean isLevel() {
+        return getPos()[0] == getPos()[1];
+    }
+
+    public void goToHeight(double targetHeightM) {
+        double current = getHeightAvg();
+        double output = liftPID.calculate(current, targetHeightM);
+        setPower(output);
+    }
+
     public void resetLiftPID() {
-        leftPID.reset();
-        rightPID.reset();
+        liftPID.reset();
     }
 
-    /** Check if lift is at target within tolerance (uses config tolerance) */
-    public boolean atPosition(int targetTicks) {
-        int leftPos = leftLift.getPosTicks();
-        int rightPos = rightLift.getPosTicks();
-        return Math.abs(leftPos - targetTicks) <= NormalSpeed.tolerance &&
-               Math.abs(rightPos - targetTicks) <= NormalSpeed.tolerance;
+    public boolean atTargetHeight() {
+        return liftPID.atSetPoint();
     }
 }
