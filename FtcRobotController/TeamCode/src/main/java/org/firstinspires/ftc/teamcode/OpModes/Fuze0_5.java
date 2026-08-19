@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.OpModes;
 
+import com.bylazar.gamepad.GamepadManager;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.command.RunCommand;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
@@ -47,14 +48,31 @@ public class Fuze0_5 extends CommandOpMode {
 
         driveSub.setDefaultCommand(new DriveCmds.TeleopDrive(driveSub, gamepad));
 
-        new GamepadButton(gamepad, GamepadKeys.Button.DPAD_UP)
-                .whenPressed(new LiftCmds.LiftGoToHeight(liftSub, 0.1));
+        // Lift bindings
+            new GamepadButton(gamepad, GamepadKeys.Button.DPAD_UP)
+                    .whenPressed(new LiftCmds.LiftGoToHeight(liftSub, 0.1));
 
-        new GamepadButton(gamepad, GamepadKeys.Button.DPAD_LEFT)
-                .whenPressed(new LiftCmds.LiftGoToHeight(liftSub, 0.2));
+            new GamepadButton(gamepad, GamepadKeys.Button.DPAD_LEFT)
+                    .whenPressed(new LiftCmds.LiftGoToHeight(liftSub, 0.2));
 
-        new GamepadButton(gamepad, GamepadKeys.Button.DPAD_RIGHT)
-                .whenPressed(new LiftCmds.LiftGoToHeight(liftSub, 0.3));
+            new GamepadButton(gamepad, GamepadKeys.Button.DPAD_RIGHT)
+                    .whenPressed(new LiftCmds.LiftGoToHeight(liftSub, 0.3));
+
+        // Box bindings
+            new GamepadButton(gamepad, GamepadKeys.Button.A)
+                    .whenPressed(new BoxCmds.Discharge(boxSub));
+
+            new GamepadButton(gamepad, GamepadKeys.Button.B)
+                    .whenPressed(new BoxCmds.Close(boxSub));
+
+        //Intake bindings
+            new GamepadButton(gamepad, GamepadKeys.Button.RIGHT_BUMPER)
+                    .whileHeld(new IntakeCmds.Intake(intakeSub));
+            new GamepadButton(gamepad, GamepadKeys.Button.LEFT_BUMPER)
+                    .whileHeld(new IntakeCmds.IntakeEject(intakeSub));
+
+
+
 
         schedule(new RunCommand(() -> {
             telemetry.addData("Arm Height (mm)", String.format("%.1f", liftSub.getHeightAvg()));
