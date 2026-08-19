@@ -17,7 +17,7 @@ public class BoxCmds {
 
         @Override
         public void initialize() {
-            // Open both servos fully
+            // Open both servos
             // uncalibrated value
             box.setServosPosition(1.0);
         }
@@ -45,7 +45,7 @@ public class BoxCmds {
 
         @Override
         public void initialize() {
-            // Close both servos fully
+            // Close both servos
             // uncalibrated value
             box.setServosPosition(0.0);
 

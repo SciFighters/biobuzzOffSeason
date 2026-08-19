@@ -10,7 +10,7 @@ public class IntakeCmds {
 
         private final IntakeSub intake;
 
-        public Intake(IntakeSub intake, boolean button) {
+        public Intake(IntakeSub intake) {
             this.intake = intake;
             addRequirements(intake);
         }
@@ -23,7 +23,7 @@ public class IntakeCmds {
 
         @Override
         public boolean isFinished() {
-            return !button;
+            return false;
         }
     }
 
@@ -31,7 +31,7 @@ public class IntakeCmds {
 
         private final IntakeSub intake;
 
-        public IntakeEject(IntakeSub intake, boolean button) {
+        public IntakeEject(IntakeSub intake) {
             this.intake = intake;
             addRequirements(intake);
         }
@@ -43,7 +43,7 @@ public class IntakeCmds {
 
         @Override
         public boolean isFinished() {
-            return !button;
+            return false;
         }
     }
 

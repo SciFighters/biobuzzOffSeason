@@ -37,8 +37,13 @@ public class LiftSub extends SubsystemBase {
     }
 
     public double[] getHeight() {
-        double rightHeight = getPos()[0] / rightMotor.ticksPerRevolution() * 2 * Math.PI * radiusM;
-        double leftHeight = getPos()[1] / leftMotor.ticksPerRevolution() * 2 * Math.PI * radiusM;
+        double rightHeight = getPos()[0] * 2 * Math.PI * radiusM
+                / rightMotor.ticksPerRevolution();
+
+        double leftHeight = getPos()[1]  * 2 * Math.PI * radiusM
+                / leftMotor.ticksPerRevolution();
+
+        // Value in Meters
         return new double[] { rightHeight, leftHeight };
     }
 
