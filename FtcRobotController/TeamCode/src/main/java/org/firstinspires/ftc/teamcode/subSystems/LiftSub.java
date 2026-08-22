@@ -13,7 +13,6 @@ public class LiftSub extends SubsystemBase {
     private static final double toleranceM = 0.1;
 
 
-
     private final PIDFController liftPID = new PIDFController(0.03, 0, 1e-3, 0); //uncalibrated
 
 
@@ -38,10 +37,10 @@ public class LiftSub extends SubsystemBase {
 
     public double[] getHeight() {
         double rightHeight = getPos()[0] * 2 * Math.PI * radiusM
-                / rightMotor.ticksPerRevolution();
+                            / rightMotor.ticksPerRevolution();
 
         double leftHeight = getPos()[1]  * 2 * Math.PI * radiusM
-                / leftMotor.ticksPerRevolution();
+                            / leftMotor.ticksPerRevolution();
 
         // Value in Meters
         return new double[] { rightHeight, leftHeight };

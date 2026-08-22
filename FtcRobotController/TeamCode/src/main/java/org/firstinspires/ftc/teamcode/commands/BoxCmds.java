@@ -4,7 +4,7 @@ import com.seattlesolvers.solverslib.command.CommandBase;
 import org.firstinspires.ftc.teamcode.subSystems.BoxSub;
 
 public class BoxCmds {
-    static boolean isBoxOpen;
+    static boolean isBoxReset;
 
     public static class Discharge extends CommandBase {
 
@@ -29,16 +29,15 @@ public class BoxCmds {
 
         @Override
         public void end(boolean interrupted) {
-            isBoxOpen = true; // for control
-
+            isBoxReset = false;
         }
     }
 
-    public static class Close extends CommandBase {
+    public static class Reset extends CommandBase {
 
         private final BoxSub box;
 
-        public Close(BoxSub box) {
+        public Reset(BoxSub box) {
             this.box = box;
             addRequirements(box);
         }
@@ -58,7 +57,7 @@ public class BoxCmds {
 
         @Override
         public void end(boolean interrupted) {
-            isBoxOpen = false; // for control
+            isBoxReset = false; // for control
 
         }
     }

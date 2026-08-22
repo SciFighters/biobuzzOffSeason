@@ -44,7 +44,6 @@ public class Fuze0_5 extends CommandOpMode {
 
         liftSub.setDefaultCommand(new LiftCmds.LiftHoldPosition(liftSub));
         intakeSub.setDefaultCommand(new IntakeCmds.IdleIntake(intakeSub));
-        boxSub.setDefaultCommand(new BoxCmds.Close(boxSub));
 
         driveSub.setDefaultCommand(new DriveCmds.TeleopDrive(driveSub, gamepad));
 
@@ -63,7 +62,7 @@ public class Fuze0_5 extends CommandOpMode {
                     .whenPressed(new BoxCmds.Discharge(boxSub));
 
             new GamepadButton(gamepad, GamepadKeys.Button.B)
-                    .whenPressed(new BoxCmds.Close(boxSub));
+                    .whenPressed(new BoxCmds.Reset(boxSub));
 
         //Intake bindings
             new GamepadButton(gamepad, GamepadKeys.Button.RIGHT_BUMPER)
