@@ -10,8 +10,8 @@ import org.firstinspires.ftc.teamcode.subSystems.LiftSub;
 
 public class CmdsGroups {
 
-    public static class HomeReset extends SequentialCommandGroup {
-        public HomeReset(LiftSub liftSub, BoxSub boxSub) {
+    public static class Home extends SequentialCommandGroup {
+        public Home(LiftSub liftSub, BoxSub boxSub) {
             addCommands(
                     new LiftCmds.LiftGoToHeight(liftSub, 0),
                     new BoxCmds.Reset(boxSub)
@@ -32,7 +32,7 @@ public class CmdsGroups {
     public static class Pickup extends SequentialCommandGroup {
         public Pickup(LiftSub liftSub, BoxSub boxSub, IntakeSub intakeSub) {
             addCommands(
-                    new HomeReset(liftSub, boxSub),
+                    new Home(liftSub, boxSub),
                     new IntakeCmds.Intake(intakeSub)
             );
         }
@@ -47,12 +47,13 @@ public class CmdsGroups {
         }
     }
 
-    public static class Cycle extends SequentialCommandGroup {
-        public Cycle(DriveSub drive, LiftSub liftSub, BoxSub boxSub, IntakeSub intakeSub) {
+    // full cycle of pickup, lift to target height, and reset to home position
+    public static class LightWorkNoReaction extends SequentialCommandGroup {
+        public LightWorkNoReaction(DriveSub drive, LiftSub liftSub, BoxSub boxSub, IntakeSub intakeSub) {
             addCommands(
                     new Pickup(liftSub, boxSub, intakeSub),
                     new TargetHeight(liftSub, boxSub),
-                    new HomeReset(liftSub, boxSub)
+                    new Home(liftSub, boxSub)
             );
         }
     }

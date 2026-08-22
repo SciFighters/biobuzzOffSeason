@@ -35,17 +35,17 @@ public class LiftCmds {
         @Override
         public void end(boolean interrupted) {
             if (!interrupted) {
-                new LiftHoldPosition(liftSub).schedule();
+                new HopeAndPray(liftSub).schedule();
             }
         }
     }
 
-    public static class LiftHoldPosition extends CommandBase {
+    public static class HopeAndPray extends CommandBase {
         private final LiftSub liftSub;
         private double targetHeightMm;
         double current;
 
-        public LiftHoldPosition(LiftSub liftSub) {
+        public HopeAndPray(LiftSub liftSub) {
             this.liftSub = Objects.requireNonNull(liftSub, "liftSub cannot be null");
             this.current = liftSub.getHeightAvg();
             addRequirements(liftSub);

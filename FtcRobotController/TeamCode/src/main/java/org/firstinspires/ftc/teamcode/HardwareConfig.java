@@ -50,9 +50,9 @@ public class HardwareConfig {
         // Intake motor
         this.intakeMotor = new MotorOut((hardwareMap.get(DcMotorEx.class, "intakeMotor")), GobildaPlanetery.RPM1150, 1);
 
-         // Lift motors
-         this.leftLift = new MotorOut((hardwareMap.get(DcMotorEx.class, "leftLift")), GobildaPlanetery.RPM312, 1000);
-         this.rightLift = new MotorOut((hardwareMap.get(DcMotorEx.class, "rightLift")), GobildaPlanetery.RPM312, 1000);
+        // Lift motors
+        this.leftLift = new MotorOut((hardwareMap.get(DcMotorEx.class, "leftLift")), GobildaPlanetery.RPM312, 1000);
+        this.rightLift = new MotorOut((hardwareMap.get(DcMotorEx.class, "rightLift")), GobildaPlanetery.RPM312, 1000);
 
 
         // Arm motor
@@ -71,8 +71,8 @@ public class HardwareConfig {
         pinpoint.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
         // both pods count forward
         pinpoint.setEncoderDirections(
-            GoBildaPinpointDriver.EncoderDirection.FORWARD,
-            GoBildaPinpointDriver.EncoderDirection.FORWARD
+                GoBildaPinpointDriver.EncoderDirection.FORWARD,
+                GoBildaPinpointDriver.EncoderDirection.FORWARD
         );
         // start at origin, heading 0
         pinpoint.setPosition(new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0));

@@ -42,7 +42,7 @@ public class Fuze0_5 extends CommandOpMode {
 
         this.gamepad = new GamepadEx(gamepad1);
 
-        liftSub.setDefaultCommand(new LiftCmds.LiftHoldPosition(liftSub));
+        liftSub.setDefaultCommand(new LiftCmds.HopeAndPray(liftSub));
         intakeSub.setDefaultCommand(new IntakeCmds.IdleIntake(intakeSub));
 
         driveSub.setDefaultCommand(new DriveCmds.TeleopDrive(driveSub, gamepad));

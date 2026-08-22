@@ -51,8 +51,8 @@ public class LiftSub extends SubsystemBase {
         return (h[0] + h[1]) / 2.0;
     }
 
-    public boolean isLevel() {
-        return getPos()[0] == getPos()[1];
+    public boolean probablyLevel() {
+        return (Math.abs(getPos()[0] - getPos()[1]) < 10);
     }
 
     public void goToHeight(double targetHeightM) {
