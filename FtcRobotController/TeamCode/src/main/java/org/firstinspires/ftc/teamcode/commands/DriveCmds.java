@@ -6,15 +6,10 @@ import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import org.firstinspires.ftc.teamcode.subSystems.DriveSub;
 
-/**
- * Commands wrapping DriveSub's field-oriented PIDF movements.
- * Each runs until the robot reaches its target or times out.
- */
 public final class DriveCmds {
 
     private DriveCmds() {}
 
-    /** Reset the Pinpoint position and IMU to zero. */
     public static class ResetPose extends CommandBase {
         private final DriveSub drive;
 
@@ -34,7 +29,6 @@ public final class DriveCmds {
         }
     }
 
-    /** Turn to a specific field heading in radians. */
     public static class Rotate extends CommandBase {
         private final DriveSub drive;
         private final double targetRad;
@@ -87,7 +81,6 @@ public final class DriveCmds {
         }
     }
 
-    /** Drive to a specific (x, y) spot on the field. */
     public static class TranslateTo extends CommandBase {
         private final DriveSub drive;
         private final double targetX, targetY;
@@ -126,8 +119,8 @@ public final class DriveCmds {
         @Override
         public void execute() {
             drive.update();
-            double curX = drive.getPosX(unit);
-            double curY = drive.getPosY(unit);
+            double curX = drive.getPos2d(unit)[0];
+            double curY = drive.getPos2d(unit)[1];
             double dx = targetX - curX;
             double dy = targetY - curY;
             double dist = Math.hypot(dx, dy);
@@ -153,8 +146,8 @@ public final class DriveCmds {
         @Override
         public boolean isFinished() {
             drive.update();
-            double curX = drive.getPosX(unit);
-            double curY = drive.getPosY(unit);
+            double curX = drive.getPos2d(unit)[0];
+            double curY = drive.getPos2d(unit)[1];
             double dist = Math.hypot(targetX - curX, targetY - curY);
 
             return dist < tolMm || (System.currentTimeMillis() - startTime) >= timeoutMs;
@@ -197,7 +190,52 @@ public final class DriveCmds {
         );
     }
 
-    /** Teleop tank/arcade drive using gamepad sticks. */
+    public static class PedroPathPoint {
+        public final double xMm, yMm, headingDeg;
+        public PedroPathPoint(double xMm, double yMm, double headingDeg) {
+            this.xMm = xMm;
+            this.yMm = yMm;
+            this.headingDeg = headingDeg;
+        }
+    }
+
+    public static class FollowPath extends CommandBase {
+        private final DriveSub drive;
+        private com.pedropathing.follower.Follower follower;
+        private long startTime;
+
+        public FollowPath(DriveSub drive, PedroPathPoint... points) {
+            this.drive = drive;
+            addRequirements(drive);
+            if (points == null || points.length < 2) {
+                throw new IllegalArgumentException("Pedro path requires at least 2 points");
+            }
+        }
+
+        @Override
+        public void initialize() {
+            startTime = System.currentTimeMillis();
+        }
+
+        @Override
+        public void execute() {
+            drive.update();
+            if (follower != null) {
+                follower.update();
+            }
+        }
+
+        @Override
+        public boolean isFinished() {
+            return (System.currentTimeMillis() - startTime) >= 5000;
+        }
+
+        @Override
+        public void end(boolean interrupted) {
+            drive.stop();
+        }
+    }
+
     public static class TeleopDrive extends CommandBase {
         private final DriveSub drive;
         private final GamepadEx gamepad;

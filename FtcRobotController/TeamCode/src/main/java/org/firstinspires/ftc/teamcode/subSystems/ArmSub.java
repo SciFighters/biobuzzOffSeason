@@ -63,11 +63,6 @@ public class ArmSub extends SubsystemBase {
         return startAngle;
     }
 
-    /**
-     * Use PID to drive arm to a target angle (in degrees).
-     * Call this repeatedly in your loop (e.g., in a command's execute).
-     * Includes a simple gravity feedforward term.
-     */
     public void setTargetAngle(double targetAngleDeg) {
         double currentAngle = getAngle();
         double output = armPID.calculate(currentAngle, targetAngleDeg);
@@ -81,12 +76,9 @@ public class ArmSub extends SubsystemBase {
         setPower(output);
     }
 
-    /** Reset PID integral/derivative when needed */
     public void resetArmPID() {
         armPID.reset();
     }
-
-    /** Check if arm is at target within tolerance */
     public boolean atTargetAngle() {
         return armPID.atSetPoint();
     }
