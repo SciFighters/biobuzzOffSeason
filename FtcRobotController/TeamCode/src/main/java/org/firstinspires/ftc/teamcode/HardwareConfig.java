@@ -63,7 +63,6 @@ public class HardwareConfig {
         configurePinpoint();
     }
 
-    /** tune offsets/directions per robot build */
     private void configurePinpoint() {
         // odometry pod offsets (mm) relative to tracking point
         pinpoint.setOffsets(-84.0, -168.0, DistanceUnit.MM);
