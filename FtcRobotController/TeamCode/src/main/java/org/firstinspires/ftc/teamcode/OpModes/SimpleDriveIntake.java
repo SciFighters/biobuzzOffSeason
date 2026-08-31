@@ -1,13 +1,13 @@
 package org.firstinspires.ftc.teamcode.OpModes;
 
 import com.seattlesolvers.solverslib.command.CommandOpMode;
-import com.seattlesolvers.solverslib.command.RunCommand;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.command.button.GamepadButton;
 import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.HardwareConfig;
 import org.firstinspires.ftc.teamcode.commands.ArmCmds;
+import org.firstinspires.ftc.teamcode.commands.DriveCmds;
 import org.firstinspires.ftc.teamcode.subSystems.ArmSub;
 import org.firstinspires.ftc.teamcode.subSystems.DriveSub;
 import org.firstinspires.ftc.teamcode.subSystems.IntakeSub;
@@ -26,23 +26,14 @@ public class SimpleDriveIntake extends CommandOpMode {
         hm = new HardwareConfig();
         hm.init(hardwareMap);
 
-        driveSub = new DriveSub(hm);
+        driveSub = new DriveSub(hardwareMap);
         intakeSub = new IntakeSub(hm);
         armSub = new ArmSub(hm);
         this.gamepad = new GamepadEx(gamepad1);
 
         armSub.setDefaultCommand(new ArmCmds.ArmHoldPosition(armSub));
 
-        driveSub.setDefaultCommand(
-                new RunCommand(
-                        () -> driveSub.drive(
-                                gamepad.getLeftX(),
-                                gamepad.getLeftY(),
-                                gamepad.getRightX()
-                        ),
-                        driveSub
-                )
-        );
+        driveSub.setDefaultCommand(new DriveCmds.TeleopDrive(driveSub, gamepad));
 
         new GamepadButton(gamepad, GamepadKeys.Button.DPAD_UP)
                 .whenPressed(new ArmCmds.ArmGoToAngle(armSub, 90.0));

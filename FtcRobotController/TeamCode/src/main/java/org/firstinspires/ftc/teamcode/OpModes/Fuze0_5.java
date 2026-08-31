@@ -35,7 +35,7 @@ public class Fuze0_5 extends CommandOpMode {
         hm = new HardwareConfig();
         hm.init(hardwareMap);
 
-        driveSub = new DriveSub(hm);
+        driveSub = new DriveSub(hardwareMap);
         intakeSub = new IntakeSub(hm);
         liftSub = new LiftSub(hm);
         boxSub = new BoxSub(hm);
