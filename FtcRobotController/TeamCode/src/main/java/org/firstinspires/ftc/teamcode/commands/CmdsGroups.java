@@ -22,7 +22,7 @@ public class CmdsGroups {
     public static class ResetAll extends SequentialCommandGroup {
         public ResetAll(DriveSub drive, LiftSub liftSub, BoxSub boxSub) {
             addCommands(
-                    new DriveCmds.ResetPose(drive),
+//                    new DriveCmds.ResetPose(drive),//error
                     new LiftCmds.LiftGoToHeight(liftSub, 0),
                     new BoxCmds.Reset(boxSub)
             );
