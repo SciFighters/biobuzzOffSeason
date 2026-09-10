@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.subSystems;
 
+import com.pedropathing.drivetrain.DrivePowers;
+import com.pedropathing.follower.ManualDrive;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.math.Pose;
 import com.pedropathing.paths.Path;
@@ -28,7 +30,14 @@ public class DriveSub extends SubsystemBase {
     }
 
     public void setTeleopDrive(double forward, double strafe, double turn) {
-        follower.manual(forward, strafe, turn);
+        DrivePowers powers = ManualDrive.fieldCentric(
+                forward,
+                strafe,
+                turn,
+                follower.pose().heading()
+        );
+        follower.manual(powers);
+        follower.update();
     }
 
     public void followPath(Path path) {
