@@ -49,7 +49,6 @@ public class DriveSub extends SubsystemBase {
     }
 
     public void stop() {
-
         follower.manual(0, 0, 0);
     }
 
