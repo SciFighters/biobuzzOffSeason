@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.commands;
 
-import com.pedropathing.paths.PathChain;
+import com.pedropathing.paths.Path;
 import com.seattlesolvers.solverslib.command.CommandBase;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import org.firstinspires.ftc.teamcode.subSystems.DriveSub;
@@ -10,9 +10,9 @@ public final class DriveCmds {
 
     public static class FollowPath extends CommandBase {
         private final DriveSub drive;
-        private final PathChain path;
+        private final Path path;
 
-        public FollowPath(DriveSub drive, PathChain path) {
+        public FollowPath(DriveSub drive, Path path) {
             this.drive = drive;
             this.path = path;
             addRequirements(drive);
@@ -54,8 +54,7 @@ public final class DriveCmds {
             drive.setTeleopDrive(
                     -gamepad.getLeftY(),
                     -gamepad.getLeftX(),
-                    -gamepad.getRightX(),
-                    true
+                    -gamepad.getRightX()
             );
         }
     }

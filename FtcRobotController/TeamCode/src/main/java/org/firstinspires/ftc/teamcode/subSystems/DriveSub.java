@@ -1,17 +1,17 @@
 package org.firstinspires.ftc.teamcode.subSystems;
 
 import com.pedropathing.follower.Follower;
-import com.pedropathing.geometry.Pose;
-import com.pedropathing.paths.PathChain;
+import com.pedropathing.math.Pose;
+import com.pedropathing.paths.Path;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
-import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.pedro.Constants;
 
 public class DriveSub extends SubsystemBase {
     private final Follower follower;
 
     public DriveSub(HardwareMap hardwareMap) {
-        follower = Constants.createFollower(hardwareMap);
+        follower = Constants.create(hardwareMap);
     }
 
     @Override
@@ -20,19 +20,19 @@ public class DriveSub extends SubsystemBase {
     }
 
     public void setStartingPose(Pose pose) {
-        follower.setStartingPose(pose);
+        follower.setPose(pose);
     }
 
     public void startTeleopDrive() {
-        follower.startTeleOpDrive();
+        follower.manual();
     }
 
-    public void setTeleopDrive(double forward, double strafe, double turn, boolean robotCentric) {
-        follower.setTeleOpDrive(forward, strafe, turn, robotCentric);
+    public void setTeleopDrive(double forward, double strafe, double turn) {
+        follower.manual(forward, strafe, turn);
     }
 
-    public void followPath(PathChain path) {
-        follower.followPath(path);
+    public void followPath(Path path) {
+        follower.follow(path);
     }
 
     public boolean isBusy() {
@@ -40,8 +40,8 @@ public class DriveSub extends SubsystemBase {
     }
 
     public void stop() {
-        follower.startTeleOpDrive(true);
-        follower.setTeleOpDrive(0, 0, 0, true);
+
+        follower.manual(0, 0, 0);
     }
 
     public Follower getFollower() {
