@@ -16,18 +16,18 @@ public class HardwareConfig {
     public MotorOut armMotor;
     public void init(HardwareMap hardwareMap) {
         // Box servos
-        leftServo = hardwareMap.get(Servo.class, "leftServo");
-        rightServo = hardwareMap.get(Servo.class, "rightServo");
+//        leftServo = hardwareMap.get(Servo.class, "leftServo");
+//        rightServo = hardwareMap.get(Servo.class, "rightServo");
 
         // Intake motor
-        this.intakeMotor = new MotorOut((hardwareMap.get(DcMotorEx.class, "intakeMotor")), GobildaPlanetery.RPM1150, 1);
+//        this.intakeMotor = new MotorOut((hardwareMap.get(DcMotorEx.class, "intakeMotor")), GobildaPlanetery.RPM1150, 1);
 
         // Lift motors
-        this.leftLift = new MotorOut((hardwareMap.get(DcMotorEx.class, "leftLift")), GobildaPlanetery.RPM312, 1000);
-        this.rightLift = new MotorOut((hardwareMap.get(DcMotorEx.class, "rightLift")), GobildaPlanetery.RPM312, 1000);
+//        this.leftLift = new MotorOut((hardwareMap.get(DcMotorEx.class, "leftLift")), GobildaPlanetery.RPM312, 1000);
+//        this.rightLift = new MotorOut((hardwareMap.get(DcMotorEx.class, "rightLift")), GobildaPlanetery.RPM312, 1000);
 
 
         // Arm motor (deprecated)
-        this.armMotor = new MotorOut((hardwareMap.get(DcMotorEx.class, "armMotor")), GobildaPlanetery.RPM60, 1);
+//        this.armMotor = new MotorOut((hardwareMap.get(DcMotorEx.class, "armMotor")), GobildaPlanetery.RPM60, 1);
     }
 }
