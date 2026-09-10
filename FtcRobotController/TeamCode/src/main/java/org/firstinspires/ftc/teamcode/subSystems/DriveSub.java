@@ -26,7 +26,7 @@ public class DriveSub extends SubsystemBase {
     }
 
     public void startTeleopDrive() {
-        follower.manual();
+        follower.manual(0, 0, 0);
     }
 
     public void setTeleopDrive(double forward, double strafe, double turn) {
