@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.commands;
 
+import com.pedropathing.math.Vector2D;
 import com.pedropathing.paths.Path;
 import com.seattlesolvers.solverslib.command.CommandBase;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
@@ -7,6 +8,10 @@ import org.firstinspires.ftc.teamcode.subSystems.DriveSub;
 
 public final class DriveCmds {
     private DriveCmds() {}
+
+    public static Vector2D getVelocity(DriveSub drive) {
+        return drive.getFollower().velocity().toVector2D();
+    }
 
     public static class FollowPath extends CommandBase {
         private final DriveSub drive;

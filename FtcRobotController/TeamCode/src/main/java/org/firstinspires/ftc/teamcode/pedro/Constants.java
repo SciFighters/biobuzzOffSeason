@@ -31,8 +31,8 @@ public class Constants {
         c.xPodDirection.set(GoBildaPinpointDriver.EncoderDirection.FORWARD);
         c.yPodDirection.set(GoBildaPinpointDriver.EncoderDirection.FORWARD);
         // Placeholder offsets
-        c.xPodOffset.set(0.0);
-        c.yPodOffset.set(0.0);
+        c.xPodOffset.set(1.25);
+        c.yPodOffset.set(-6.125);
         c.offsetUnits.set(DistanceUnit.INCH);
         c.globalDistanceUnit.set(DistanceUnit.INCH);
     });
