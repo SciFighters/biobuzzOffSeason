@@ -4,24 +4,19 @@ import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.command.RunCommand;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import org.firstinspires.ftc.teamcode.HardwareConfig;
 
 import org.firstinspires.ftc.teamcode.commands.DriveCmds;
 import org.firstinspires.ftc.teamcode.subSystems.DriveSub;
 
 @TeleOp(name = "Fuze 0.5", group = "Fuze")
 public class Fuze0_5 extends CommandOpMode {
+    DriveSub driveSub;
 
-    private HardwareConfig hm;
-
-    private DriveSub driveSub;
-
-    private GamepadEx gamepad;
+    GamepadEx gamepad;
 
     @Override
     public void initialize() {
-        hm = new HardwareConfig();
-        hm.init(hardwareMap);
+
 
         driveSub = new DriveSub(hardwareMap);
 
@@ -32,7 +27,6 @@ public class Fuze0_5 extends CommandOpMode {
 
 
        schedule(new RunCommand(() -> {
-            telemetry.addData("Velocity: ", DriveCmds.getVelocity(driveSub));
             telemetry.update();
         }));
     }

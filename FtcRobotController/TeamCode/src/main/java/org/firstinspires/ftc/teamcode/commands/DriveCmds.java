@@ -7,38 +7,6 @@ import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import org.firstinspires.ftc.teamcode.subSystems.DriveSub;
 
 public final class DriveCmds {
-    private DriveCmds() {}
-
-    public static Vector2D getVelocity(DriveSub drive) {
-        return drive.getFollower().velocity().toVector2D();
-    }
-
-    public static class FollowPath extends CommandBase {
-        private final DriveSub drive;
-        private final Path path;
-
-        public FollowPath(DriveSub drive, Path path) {
-            this.drive = drive;
-            this.path = path;
-            addRequirements(drive);
-        }
-
-        @Override
-        public void initialize() {
-            drive.followPath(path);
-        }
-
-        @Override
-        public void end(boolean interrupted) {
-            if (interrupted) drive.stop();
-        }
-
-        @Override
-        public boolean isFinished() {
-            return !drive.isBusy();
-        }
-    }
-
     public static class TeleopDrive extends CommandBase {
         private final DriveSub drive;
         private final GamepadEx gamepad;
