@@ -22,6 +22,11 @@ public class IntakeCmds {
         }
 
         @Override
+        public void end(boolean interrupted) {
+            intake.setPower(0.0);
+        }
+
+        @Override
         public boolean isFinished() {
             return false;
         }
@@ -42,16 +47,21 @@ public class IntakeCmds {
         }
 
         @Override
+        public void end(boolean interrupted) {
+            intake.setPower(0.0);
+        }
+
+        @Override
         public boolean isFinished() {
             return false;
         }
     }
 
-    public static class IdleIntake extends CommandBase {
+    public static class StopIntake extends CommandBase {
 
         private final IntakeSub intake;
 
-        public IdleIntake(IntakeSub intake) {
+        public StopIntake(IntakeSub intake) {
             this.intake = intake;
             addRequirements(intake);
         }

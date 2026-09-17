@@ -6,10 +6,10 @@ import org.firstinspires.ftc.teamcode.Utilities.MotorOut;
 
 public class IntakeSub extends SubsystemBase {
 
-    private MotorOut intakeMotor ;
+    private final MotorOut intakeMotor;
 
-    public IntakeSub(HardwareConfig hm) {
-        intakeMotor = hm.intakeMotor;
+    public IntakeSub(MotorOut intakeMotor) {
+        this.intakeMotor = intakeMotor;
     }
 
     public void setPower(double power) {
