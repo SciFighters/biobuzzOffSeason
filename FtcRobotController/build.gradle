@@ -8,13 +8,13 @@ buildscript {
     repositories {
         mavenCentral()
         google()
-//        maven { url "https://repo.dairy.foundation/releases" }
     }
-dependencies {
-         // Note for FTC Teams: Do not modify this yourself.
-         classpath 'com.android.tools.build:gradle:8.9.1'
-//         classpath "dev.frozenmilk:Load:0.2.4"
-     }
+}
+
+plugins {
+    // Note for FTC Teams: Do not modify this yourself.
+    id 'com.android.application' version '8.13.2' apply false
+    id 'com.android.library' version '8.13.2' apply false
 }
 
 configurations.all {

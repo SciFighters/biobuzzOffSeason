@@ -5,7 +5,6 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import org.jetbrains.annotations.NotNull;
 
 
-
 public class MotorOut {
     @NotNull public final DcMotorEx motor;
     public static final int ticksPerRevolutionBare = 28; // native ticks/rev
