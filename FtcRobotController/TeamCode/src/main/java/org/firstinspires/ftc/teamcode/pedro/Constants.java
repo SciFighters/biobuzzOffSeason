@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.pedro;
 
+import com.pedropathing.algorithm.Foresight;
 import com.pedropathing.algorithm.ForesightConfig;
 import com.pedropathing.controllers.Controller;
 import com.pedropathing.follower.Follower;
@@ -65,7 +66,9 @@ public class Constants {
             }
     );
     public static Follower create(HardwareMap h) {
-        // TeleOp only; supply a tuned algorithm before using paths, hold, isBusy, debug
-        return new Follower(new PinpointLocalizer(h, localizerConfig), new Mecanum(h, driveConfig), null);
-    }
+        return new Follower(
+                new PinpointLocalizer(h, localizerConfig),
+                new Mecanum(h, driveConfig),
+                new Foresight(foresightConfig)
+        );    }
 }
