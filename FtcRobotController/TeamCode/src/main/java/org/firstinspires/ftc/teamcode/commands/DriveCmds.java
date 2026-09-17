@@ -57,7 +57,7 @@ public final class DriveCmds {
         @Override
         public void execute() {
             drive.setTeleopDrive(
-                    -gamepad.getLeftY(),
+                    gamepad.getLeftY(),
                     -gamepad.getLeftX(),
                     -gamepad.getRightX()
             );
