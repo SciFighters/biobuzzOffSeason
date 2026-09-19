@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.Utilities;
 
-public enum GobildaPlanetery {
+public enum GobildaPlanetary {
     RPM6000(1),
     RPM1620(3.7),
     RPM1150(5.2),
@@ -11,11 +11,11 @@ public enum GobildaPlanetery {
     RPM84(71.2),
     RPM60(99.5),
     RPM43(139),
-    RPM30(188),
-    ;
+    RPM30(188);
+
     public final double ratio;
 
-    GobildaPlanetery(double ratio) {
+    GobildaPlanetary(double ratio) {
         this.ratio = ratio;
     }
 
@@ -24,6 +24,6 @@ public enum GobildaPlanetery {
     }
 
     public static double toRatio(String rpmName) {
-        return GobildaPlanetery.valueOf(rpmName).getValue();
+        return GobildaPlanetary.valueOf(rpmName).getValue();
     }
 }

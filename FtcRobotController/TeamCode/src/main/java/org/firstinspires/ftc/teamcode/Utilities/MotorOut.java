@@ -14,7 +14,7 @@ public class MotorOut {
     private int ticksPerRevolutionOut; // effective ticks/rev at output
     private double radius;
 
-     public MotorOut(@NotNull DcMotorEx motor, GobildaPlanetery planetary, double systemGearRatio) {
+     public MotorOut(@NotNull DcMotorEx motor, GobildaPlanetary planetary, double systemGearRatio) {
          this.motor = motor;
          this.systemGearRatio = systemGearRatio;
          this.planetaryRatio = planetary.ratio;
@@ -70,11 +70,6 @@ public class MotorOut {
 
     public void resetEncoder() {
          motor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-         try {
-             Thread.sleep(250);
-         } catch (InterruptedException e) {
-             Thread.currentThread().interrupt();
-         }
          motor.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
      }
 }

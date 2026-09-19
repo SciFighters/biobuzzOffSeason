@@ -37,7 +37,6 @@ public class DriveSub extends SubsystemBase {
                 follower.pose().heading()
         );
         follower.manual(powers);
-        follower.update();
     }
 
     public void followPath(Path path) {

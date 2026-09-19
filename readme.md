@@ -7,26 +7,23 @@
 
 ```text
 TeamCode/src/main/java/org/firstinspires/ftc/teamcode/
-├── HardwareConfig.java
+├── Auto/
+│   └── TestAuto.java
 ├── OpModes/
-│   ├── Fuze0_5.java
-├── subSystems/
-│   ├── DriveSub.java
-│   ├── IntakeSub.java
-│   ├── LiftSub.java
-│   ├── ArmSub.java
-│   └── BoxSub.java
+│   └── Fuze0_5.java
+├── Utilities/
+│   ├── GobildaPlanetary.java
+│   └── MotorOut.java
 ├── commands/
 │   ├── DriveCmds.java
-│   ├── IntakeCmds.java
-│   ├── LiftCmds.java
-│   ├── ArmCmds.java
-│   ├── BoxCmds.java
-│   └── CmdsGroups.java
-├── pedroPathing/
+│   └── IntakeCmds.java
+├── pedro/
 │   ├── Constants.java
-│   └── Tuning.java
-└── Utilities/
-    ├── MotorOut.java
-    └── GobildaPlanetery.java
+│   ├── Tuning.java
+│   └── procedures/
+├── subSystems/
+│   ├── DriveSub.java
+│   └── IntakeSub.java
+└── tools/
+    └── java_to_pp.py
 ```
