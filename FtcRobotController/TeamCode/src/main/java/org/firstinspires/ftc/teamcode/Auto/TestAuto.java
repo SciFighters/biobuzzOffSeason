@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Auto;
 
 import static com.pedropathing.api.Paths.curve;
 import static com.pedropathing.api.Paths.path;
+import static org.firstinspires.ftc.teamcode.Utilities.Utils.splitBezierControlPoints;
 
 
 import com.pedropathing.api.PoseFactory;
@@ -22,15 +23,13 @@ public class TestAuto extends CommandOpMode {
     // The robot starts facing up the field (+Y).
     private final Pose start = poseFactory.of(70.4172, 8, 90);
     private final Pose straight = poseFactory.of(70.4981, 8.2706, -90);
-    // These points preserve the original curve, split at 59.98% of its length.
-    // If the route changes, regenerate both sets of control points together.
-    private final Pose outboundControl1 = poseFactory.of(113.545307570582, 51.822059569060, 0);
-    private final Pose outboundControl2 = poseFactory.of(91.799557007426, 88.695125971744, 0);
-    private final Pose outboundControl3 = poseFactory.of(77.737896477899, 103.402262155795, 0);
-    private final Pose split = poseFactory.of(72.374194868174, 80.294791883761, 0);
-    private final Pose inboundControl1 = poseFactory.of(70.323264103477, 71.459136002141, 0);
-    private final Pose inboundControl2 = poseFactory.of(69.544049331007, 57.094661208711, 0);
-    private final Pose inboundControl3 = poseFactory.of(70.093232002681, 36.326511097650, 0);
+    private final Pose straightControl1 = poseFactory.of(130.0363, 68.5784, 0);
+    private final Pose straightControl2 = poseFactory.of(65.6845, 115.8776, 0);
+    private final Pose straightControl3 = poseFactory.of(69.0344, 109.6998, 0);
+    // Bezier parameter, originally chosen to split at 59.98% of this curve's length.
+    private final double splitProgress = 0.7233941399749743;
+    private final Pose[][] segments = splitBezierControlPoints(
+            new Pose[]{start, straightControl1, straightControl2, straightControl3, straight}, splitProgress);
     private final Pose straightSegment1Target = poseFactory.of(72, 71.5, 0);
 
     @Override
@@ -40,10 +39,10 @@ public class TestAuto extends CommandOpMode {
         follower.setPose(start);
         follower.update();
         // Face the target directly, avoiding the old piecewise heading jump.
-        Path outbound = curve(start, outboundControl1, outboundControl2, outboundControl3, split)
+        Path outbound = curve(segments[0])
                 .facingPoint(straightSegment1Target);
         // Turn smoothly from the outbound heading to the final heading.
-        Path inbound = curve(split, inboundControl1, inboundControl2, inboundControl3, straight)
+        Path inbound = curve(segments[1])
                 .linear(outbound.endPose().heading(), straight.heading());
         // Follow both parts in order so the nearby finish cannot skip the loop.
         Path path = path(outbound, inbound);
