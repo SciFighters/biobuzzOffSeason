@@ -1,10 +1,23 @@
 package org.firstinspires.ftc.teamcode.commands;
 
 import com.seattlesolvers.solverslib.command.CommandBase;
+import com.seattlesolvers.solverslib.command.InstantCommand;
 import org.firstinspires.ftc.teamcode.subSystems.IntakeSub;
 
 public class IntakeCmds {
-    static boolean button;
+    public static class ExpandIntake extends InstantCommand {
+        public ExpandIntake(IntakeSub intake) {
+            // uncalibrated value
+            super(() -> intake.servoPos(1.0), intake);
+        }
+    }
+
+    public static class RetractIntake extends InstantCommand {
+        public RetractIntake(IntakeSub intake) {
+            // uncalibrated value
+            super(() -> intake.servoPos(0.0), intake);
+        }
+    }
 
     public static class Intake extends CommandBase {
 
@@ -25,11 +38,6 @@ public class IntakeCmds {
         public void end(boolean interrupted) {
             intake.setPower(0.0);
         }
-
-        @Override
-        public boolean isFinished() {
-            return false;
-        }
     }
 
     public static class IntakeEject extends CommandBase {
@@ -49,11 +57,6 @@ public class IntakeCmds {
         @Override
         public void end(boolean interrupted) {
             intake.setPower(0.0);
-        }
-
-        @Override
-        public boolean isFinished() {
-            return false;
         }
     }
 

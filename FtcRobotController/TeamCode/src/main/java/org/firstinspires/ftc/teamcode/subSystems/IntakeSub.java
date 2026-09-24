@@ -12,6 +12,7 @@ public class IntakeSub extends SubsystemBase {
 
     public IntakeSub(HardwareMap hm) {
         intakeMotor = hm.get(DcMotorEx.class, "intakeMotor");
+        intakeMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         intakeServo = hm.get(Servo.class, "intakeServo");
     }
 
