@@ -1,15 +1,18 @@
 package org.firstinspires.ftc.teamcode.subSystems;
 
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
-
-import org.firstinspires.ftc.teamcode.Utilities.MotorOut;
 
 public class IntakeSub extends SubsystemBase {
 
-    private final MotorOut intakeMotor;
+    private final DcMotorEx intakeMotor;
+    private final Servo intakeServo;
 
-    public IntakeSub(MotorOut intakeMotor) {
-        this.intakeMotor = intakeMotor;
+    public IntakeSub(HardwareMap hm) {
+        intakeMotor = hm.get(DcMotorEx.class, "intakeMotor");
+        intakeServo = hm.get(Servo.class, "intakeServo");
     }
 
     public void setPower(double power) {
@@ -18,5 +21,9 @@ public class IntakeSub extends SubsystemBase {
 
     public double getPower() {
         return intakeMotor.getPower();
+    }
+
+    public void servoPos(double pos) {
+        intakeServo.setPosition(pos);
     }
 }
