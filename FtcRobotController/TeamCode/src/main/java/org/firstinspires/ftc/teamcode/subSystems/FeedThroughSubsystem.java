@@ -3,17 +3,13 @@ package org.firstinspires.ftc.teamcode.subSystems;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.seattlesolvers.solverslib.command.CommandBase;
-import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 
-import kotlin.time.Instant;
-
-public class FeedThroughSub extends SubsystemBase {
+public class FeedThroughSubsystem extends SubsystemBase {
     private DcMotorEx transferMotor;
     private Servo gateServo;
 
-    public FeedThroughSub(HardwareMap hm) {
+    public FeedThroughSubsystem(HardwareMap hm) {
         transferMotor = hm.get(DcMotorEx.class, "transferMotor");
         gateServo = hm.get(Servo.class, "gateServo");
     }

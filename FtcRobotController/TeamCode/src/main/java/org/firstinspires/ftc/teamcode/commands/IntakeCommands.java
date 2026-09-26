@@ -2,34 +2,34 @@ package org.firstinspires.ftc.teamcode.commands;
 
 import com.seattlesolvers.solverslib.command.CommandBase;
 import com.seattlesolvers.solverslib.command.InstantCommand;
-import org.firstinspires.ftc.teamcode.subSystems.IntakeSub;
+import org.firstinspires.ftc.teamcode.subSystems.IntakeSubsystem;
 
-public class IntakeCmds {
+public class IntakeCommands {
     public static class ExpandIntake extends InstantCommand {
-        public ExpandIntake(IntakeSub intake) {
+        public ExpandIntake(IntakeSubsystem intake) {
             // uncalibrated value
             super(() -> intake.servoPos(1.0), intake);
         }
     }
 
     public static class RetractIntake extends InstantCommand {
-        public RetractIntake(IntakeSub intake) {
+        public RetractIntake(IntakeSubsystem intake) {
             // uncalibrated value
             super(() -> intake.servoPos(0.0), intake);
         }
     }
 
-    public static class Intake extends CommandBase {
+    public static class StartIntake extends CommandBase {
 
-        private final IntakeSub intake;
+        private final IntakeSubsystem intake;
 
-        public Intake(IntakeSub intake) {
+        public StartIntake(IntakeSubsystem intake) {
             this.intake = intake;
             addRequirements(intake);
         }
 
         @Override
-        public void execute() {
+        public void initialize() {
             // uncalibrated value
             intake.setPower(1.0);
         }
@@ -40,17 +40,17 @@ public class IntakeCmds {
         }
     }
 
-    public static class IntakeEject extends CommandBase {
+    public static class StartOuttake extends CommandBase {
 
-        private final IntakeSub intake;
+        private final IntakeSubsystem intake;
 
-        public IntakeEject(IntakeSub intake) {
+        public StartOuttake(IntakeSubsystem intake) {
             this.intake = intake;
             addRequirements(intake);
         }
 
         @Override
-        public void execute() {
+        public void initialize() {
             intake.setPower(-1.0);
         }
 
@@ -62,9 +62,9 @@ public class IntakeCmds {
 
     public static class StopIntake extends CommandBase {
 
-        private final IntakeSub intake;
+        private final IntakeSubsystem intake;
 
-        public StopIntake(IntakeSub intake) {
+        public StopIntake(IntakeSubsystem intake) {
             this.intake = intake;
             addRequirements(intake);
         }
@@ -76,7 +76,6 @@ public class IntakeCmds {
 
         @Override
         public boolean isFinished() {
-            // Command completes immediately
             return true;
         }
     }

@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-public class CamSub implements AutoCloseable {
+public class IntakeCamera implements AutoCloseable {
 
     private final VisionPortal portal;
     private final Map<ColorRange, ColorBlobLocatorProcessor> blobProcessors = new HashMap<>();
@@ -32,7 +32,7 @@ public class CamSub implements AutoCloseable {
     private final Set<ColorBlobLocatorProcessor> initializedBlobProcessors = new HashSet<>();
     private CameraCalibration calibration;
 
-    public CamSub(HardwareMap hm, VisionProcessor... processors) {
+    public IntakeCamera(HardwareMap hm, VisionProcessor... processors) {
         portal = new VisionPortal.Builder()
                 .setCamera(hm.get(WebcamName.class, "cam"))
                 .setCameraResolution(new Size(640, 480)) // 480p
@@ -40,7 +40,7 @@ public class CamSub implements AutoCloseable {
                 .addProcessor(new VisionProcessor() {
                     @Override
                     public void init(int width, int height, CameraCalibration cameraCalibration) {
-                        synchronized (CamSub.this) {
+                        synchronized (IntakeCamera.this) {
                             calibration = cameraCalibration;
                             initializedBlobProcessors.clear();
                         }
@@ -48,7 +48,7 @@ public class CamSub implements AutoCloseable {
 
                     @Override
                     public Object processFrame(Mat frame, long captureTimeNanos) {
-                        synchronized (CamSub.this) {
+                        synchronized (IntakeCamera.this) {
                             for (Map.Entry<ColorRange, ColorBlobLocatorProcessor> entry : blobProcessors.entrySet()) {
                                 ColorBlobLocatorProcessor processor = entry.getValue();
                                 if (initializedBlobProcessors.add(processor)) {

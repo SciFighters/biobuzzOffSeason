@@ -5,12 +5,12 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 
-public class IntakeSub extends SubsystemBase {
+public class IntakeSubsystem extends SubsystemBase {
 
     private final DcMotorEx intakeMotor;
     private final Servo intakeServo;
 
-    public IntakeSub(HardwareMap hm) {
+    public IntakeSubsystem(HardwareMap hm) {
         intakeMotor = hm.get(DcMotorEx.class, "intakeMotor");
         intakeMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         intakeServo = hm.get(Servo.class, "intakeServo");

@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.OpModes;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 
-import org.firstinspires.ftc.teamcode.subSystems.CamSub;
+import org.firstinspires.ftc.teamcode.subSystems.IntakeCamera;
 import org.firstinspires.ftc.vision.opencv.ColorRange;
 import org.opencv.core.Point;
 
@@ -11,12 +11,12 @@ import java.util.List;
 
 @TeleOp(name = "CamTest", group = "Test")
 public class CamTest extends CommandOpMode {
-    private CamSub camera;
+    private IntakeCamera camera;
 
     @Override
     public void initialize() {
         telemetry.setMsTransmissionInterval(100);
-        camera = new CamSub(hardwareMap);
+        camera = new IntakeCamera(hardwareMap);
         camera.scanBlobs(ColorRange.YELLOW);
         camera.scanBlobs(ColorRange.RED);
         camera.scanBlobs(ColorRange.BLUE);

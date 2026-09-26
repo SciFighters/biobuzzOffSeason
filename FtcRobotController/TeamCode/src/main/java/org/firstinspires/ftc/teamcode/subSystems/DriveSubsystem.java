@@ -9,10 +9,10 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import org.firstinspires.ftc.teamcode.pedro.Constants;
 
-public class DriveSub extends SubsystemBase {
+public class DriveSubsystem extends SubsystemBase {
     private final Follower follower;
 
-    public DriveSub(HardwareMap hardwareMap) {
+    public DriveSubsystem(HardwareMap hardwareMap) {
         follower = Constants.create(hardwareMap);
     }
 
