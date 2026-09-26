@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.pedro.Constants;
 import org.firstinspires.ftc.teamcode.subSystems.IntakeCamera;
 import org.firstinspires.ftc.vision.opencv.ColorRange;
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
 
 import java.util.List;
 
@@ -100,13 +101,27 @@ public class CameraTest extends ActionOpMode {
         ));
     }
 
-//    this func is bad
-//    if (me.willPower > 0) {
-//        make function find out the distance via size off blob;
-//        do trigo to find angle via distance and offset;
-//        move that angle;
-//
-//        currently it just moves gradually until it locks onto the pollen :(
-//     }
+    public void elementLockIn(ColorRange color) {
+        List<Rect> blobs = camera.scanBlobBounds(color);
+        if (blobs.isEmpty()) return;
 
+        Rect blob = blobs.get(0);
+        double blobWidth = blob.width;
+        if (blobWidth <= 0) return;
+
+        double posX = blob.x + blobWidth / 2.0;
+        double pollenWidth = 2.8;
+        double focalLength = 622; // good number idk
+        double center = 640 / 2.0; // width resolution / 2
+        double offset = center - posX;
+        double distance = focalLength * pollenWidth / blobWidth;
+        double lateral = offset * distance / focalLength;
+        double angle = Math.atan2(lateral, distance);
+        Pose current = follower.pose();
+        follower.hold(new Pose(
+            current.x(),
+            current.y(),
+            current.heading() + angle
+        ));
+    }
 }

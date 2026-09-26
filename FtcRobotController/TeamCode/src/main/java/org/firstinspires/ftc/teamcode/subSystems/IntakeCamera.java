@@ -17,6 +17,7 @@ import org.firstinspires.ftc.vision.opencv.ColorRange;
 import org.firstinspires.ftc.vision.opencv.ImageRegion;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -150,5 +151,17 @@ public class IntakeCamera implements AutoCloseable {
             centers.add(new Point(center.x, center.y));
         }
         return centers;
+    }
+
+
+    public synchronized List<Rect> scanBlobBounds(ColorRange color) {
+        scanBlobs(color);
+        ColorBlobLocatorProcessor processor = blobProcessors.get(color);
+        List<Rect> bounds = new ArrayList<>();
+        for (ColorBlobLocatorProcessor.Blob blob : processor.getBlobs()) {
+            Rect bound = blob.getBoxFit().boundingRect();
+            bounds.add(bound);
+        }
+        return bounds;
     }
 }
