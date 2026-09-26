@@ -1,20 +1,17 @@
 package org.firstinspires.ftc.teamcode.OpModes.tests;
 
 import com.bylazar.configurables.annotations.Configurable;
-import com.qualcomm.hardware.motors.GoBILDA5202Series;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.configuration.annotations.MotorType;
 import com.seattlesolvers.solverslib.command.button.GamepadButton;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
-import com.seattlesolvers.solverslib.hardware.motors.Motor;
 
 import org.firstinspires.ftc.teamcode.Utilities.ActionOpMode;
 @Configurable
 @TeleOp(name = "FlyWheelTester", group = "tests")
-public class FlyWheel extends ActionOpMode {
+public class FlyWheelTest extends ActionOpMode {
     GamepadEx gamepad;
     GamepadButton A, B, X, Y, up, down;
     DcMotorEx motor;
