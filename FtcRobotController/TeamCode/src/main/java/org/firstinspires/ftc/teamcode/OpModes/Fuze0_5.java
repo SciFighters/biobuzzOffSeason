@@ -5,11 +5,12 @@ import com.seattlesolvers.solverslib.command.RunCommand;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.Utilities.ActionOpMode;
 import org.firstinspires.ftc.teamcode.commands.DriveCmds;
 import org.firstinspires.ftc.teamcode.subSystems.DriveSub;
 
 @TeleOp(name = "Fuze 0.5", group = "Fuze")
-public class Fuze0_5 extends CommandOpMode {
+public class Fuze0_5 extends ActionOpMode {
     DriveSub driveSub;
 
     GamepadEx gamepad;
