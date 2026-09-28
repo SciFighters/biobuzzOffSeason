@@ -41,6 +41,7 @@ public class FlyWheelTest extends ActionOpMode {
     @Override
     public void run() {
         super.run();
+        motor.setPower(power);
 //        servo.setPower(power);//commented while not using the servo
         multipleTelemetry.addLine("up(+) and down(-) for major RPM changes");
         multipleTelemetry.addLine("Y(+) and A(-) for minor RPM changes");
