@@ -26,8 +26,5 @@ public class Fuze0_5 extends ActionOpMode {
         driveSub.setDefaultCommand(new DriveCommands.TeleopDrive(driveSub, gamepad));
 
 
-       schedule(new RunCommand(() -> {
-            telemetry.update();
-        }));
     }
 }
