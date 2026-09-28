@@ -1,17 +1,17 @@
 package org.firstinspires.ftc.teamcode.OpModes.tests;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.util.Range;
 import com.pedropathing.follower.Follower;
-import com.pedropathing.math.Pose;
+import com.seattlesolvers.solverslib.command.button.GamepadButton;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
+import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
 
 import org.firstinspires.ftc.teamcode.Utilities.ActionOpMode;
+import org.firstinspires.ftc.teamcode.commands.IntakeCameraCommands;
 import org.firstinspires.ftc.teamcode.pedro.Constants;
 import org.firstinspires.ftc.teamcode.subSystems.IntakeCamera;
 import org.firstinspires.ftc.vision.opencv.ColorRange;
 import org.opencv.core.Point;
-import org.opencv.core.Rect;
 
 import java.util.List;
 
@@ -26,25 +26,15 @@ public class CameraTest extends ActionOpMode {
         follower = Constants.create(hardwareMap);
         follower.manual(0, 0, 0);
         camera = new IntakeCamera(hardwareMap);
-        camera.scanBlobs(ColorRange.YELLOW);
-        camera.scanBlobs(ColorRange.RED);
-        camera.scanBlobs(ColorRange.BLUE);
-
         gamepad = new GamepadEx(gamepad1);
+        IntakeCameraCommands.ElementLockIn lockIn = new IntakeCameraCommands.ElementLockIn(follower, camera);
+        new GamepadButton(gamepad, GamepadKeys.Button.A)
+                .whenPressed(() -> schedule(lockIn));
     }
 
     @Override
     public void run() {
         super.run();
-        if (gamepad1.a) {
-            List<Point> yellow = camera.scanBlobs(ColorRange.YELLOW);
-            if (!yellow.isEmpty()) {
-                Point center = yellow.get(0);
-                elementFocus(center.x);
-            } else {
-                follower.manual(0, 0, 0);
-            }
-        }
 
 
         telemeter();
@@ -57,7 +47,7 @@ public class CameraTest extends ActionOpMode {
             follower.manual(0, 0, 0);
             follower.update();
         }
-        super.stop();
+        super.end();
         if (camera != null) camera.close();
     }
 
@@ -86,42 +76,5 @@ public class CameraTest extends ActionOpMode {
             multipleTelemetry.addData("Blue blob " + (i + 1), "x=%.1f, y=%.1f", center.x, center.y);
         }
         multipleTelemetry.update();
-    }
-
-    public void elementFocus(double posX) {
-        double center = 640 / 2.0; // width resolution / 2
-        double offset = center - posX;
-        double degrees = Math.abs(offset) > 5
-            ? Range.clip(offset * 0.02, -5, 5) : 0;
-        Pose current = follower.pose();
-        follower.hold(new Pose(
-            current.x(),
-            current.y(),
-            current.heading() + Math.toRadians(degrees)
-        ));
-    }
-
-    public void elementLockIn(ColorRange color) {
-        List<Rect> blobs = camera.scanBlobBounds(color);
-        if (blobs.isEmpty()) return;
-
-        Rect blob = blobs.get(0);
-        double blobWidth = blob.width;
-        if (blobWidth <= 0) return;
-
-        double posX = blob.x + blobWidth / 2.0;
-        double pollenWidth = 2.8;
-        double focalLength = 622; // good number idk
-        double center = 640 / 2.0; // width resolution / 2
-        double offset = center - posX;
-        double distance = focalLength * pollenWidth / blobWidth;
-        double lateral = offset * distance / focalLength;
-        double angle = Math.atan2(lateral, distance);
-        Pose current = follower.pose();
-        follower.hold(new Pose(
-            current.x(),
-            current.y(),
-            current.heading() + angle
-        ));
     }
 }

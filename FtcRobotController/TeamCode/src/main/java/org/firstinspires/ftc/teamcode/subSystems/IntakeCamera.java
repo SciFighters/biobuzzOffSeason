@@ -14,10 +14,12 @@ import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.VisionProcessor;
 import org.firstinspires.ftc.vision.opencv.ColorBlobLocatorProcessor;
 import org.firstinspires.ftc.vision.opencv.ColorRange;
+import org.firstinspires.ftc.vision.opencv.ColorSpace;
 import org.firstinspires.ftc.vision.opencv.ImageRegion;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,6 +34,11 @@ import java.util.Set;
 public class IntakeCamera implements AutoCloseable {
 
     public static double minBlobSize = 2000;
+    public static int yellowHueMin = 20;
+    public static int yellowHueMax = 40; // <- ^: good values
+
+    private final Scalar yellowMin = new Scalar(yellowHueMin, 120, 80);
+    private final Scalar yellowMax = new Scalar(yellowHueMax, 255, 255);
 
     private final VisionPortal portal;
     private final Map<ColorRange, ColorBlobLocatorProcessor> blobProcessors = new HashMap<>();
@@ -55,25 +62,36 @@ public class IntakeCamera implements AutoCloseable {
 
                     @Override
                     public Object processFrame(Mat frame, long captureTimeNanos) {
+                        int min = Math.max(0, Math.min(179, yellowHueMin));
+                        int max = Math.max(0, Math.min(179, yellowHueMax));
+                        yellowMin.val[0] = Math.min(min, max);
+                        yellowMax.val[0] = Math.max(min, max);
                         Map<ColorBlobLocatorProcessor, Object> drawContexts = new HashMap<>();
                         ColorBlobLocatorProcessor.BlobFilter areaFilter =
                                 new ColorBlobLocatorProcessor.BlobFilter(
                                         ColorBlobLocatorProcessor.BlobCriteria.BY_CONTOUR_AREA,
                                         minBlobSize, Double.MAX_VALUE);
+                        Map<ColorRange, ColorBlobLocatorProcessor> processors;
                         synchronized (IntakeCamera.this) {
-                            for (Map.Entry<ColorRange, ColorBlobLocatorProcessor> entry : blobProcessors.entrySet()) {
-                                ColorBlobLocatorProcessor processor = entry.getValue();
+                            processors = new HashMap<>(blobProcessors);
+                            for (ColorBlobLocatorProcessor processor : processors.values()) {
                                 if (initializedBlobProcessors.add(processor)) {
                                     processor.init(frame.cols(), frame.rows(), calibration);
                                 }
-                                processor.removeAllFilters();
-                                processor.addFilter(areaFilter);
-                                drawContexts.put(processor, processor.processFrame(frame, captureTimeNanos));
-                                List<Point> centers = new ArrayList<>();
-                                for (ColorBlobLocatorProcessor.Blob blob : processor.getBlobs()) {
-                                    Point center = blob.getBoxFit().center;
-                                    centers.add(new Point(center.x, center.y));
-                                }
+                            }
+                        }
+                        // Keep image processing off the lock used by the robot control loop.
+                        for (Map.Entry<ColorRange, ColorBlobLocatorProcessor> entry : processors.entrySet()) {
+                            ColorBlobLocatorProcessor processor = entry.getValue();
+                            processor.removeAllFilters();
+                            processor.addFilter(areaFilter);
+                            drawContexts.put(processor, processor.processFrame(frame, captureTimeNanos));
+                            List<Point> centers = new ArrayList<>();
+                            for (ColorBlobLocatorProcessor.Blob blob : processor.getBlobs()) {
+                                Point center = blob.getBoxFit().center;
+                                centers.add(new Point(center.x, center.y));
+                            }
+                            synchronized (IntakeCamera.this) {
                                 blobCenters.put(entry.getKey(), centers);
                             }
                         }
@@ -87,11 +105,9 @@ public class IntakeCamera implements AutoCloseable {
                                             Object userContext) {
                         Map<ColorBlobLocatorProcessor, Object> drawContexts =
                                 (Map<ColorBlobLocatorProcessor, Object>) userContext;
-                        synchronized (IntakeCamera.this) {
-                            for (Map.Entry<ColorBlobLocatorProcessor, Object> entry : drawContexts.entrySet()) {
-                                entry.getKey().onDrawFrame(canvas, width, height,
-                                        scaleBmpPxToCanvasPx, scaleCanvasDensity, entry.getValue());
-                            }
+                        for (Map.Entry<ColorBlobLocatorProcessor, Object> entry : drawContexts.entrySet()) {
+                            entry.getKey().onDrawFrame(canvas, width, height,
+                                    scaleBmpPxToCanvasPx, scaleCanvasDensity, entry.getValue());
                         }
                     }
                 })
@@ -137,7 +153,8 @@ public class IntakeCamera implements AutoCloseable {
                     : color == ColorRange.BLUE ? Color.BLUE
                     : color == ColorRange.YELLOW ? Color.YELLOW : Color.WHITE;
             processor = new ColorBlobLocatorProcessor.Builder()
-                    .setTargetColorRange(color)
+                    .setTargetColorRange(color == ColorRange.YELLOW
+                            ? new ColorRange(ColorSpace.HSV, yellowMin, yellowMax) : color)
                     .setContourMode(ColorBlobLocatorProcessor.ContourMode.EXTERNAL_ONLY)
                     .setRoi(ImageRegion.entireFrame())
                     .setDrawContours(true)
@@ -152,7 +169,6 @@ public class IntakeCamera implements AutoCloseable {
         }
         return centers;
     }
-
 
     public synchronized List<Rect> scanBlobBounds(ColorRange color) {
         scanBlobs(color);
