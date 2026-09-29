@@ -6,6 +6,7 @@ import android.util.Size;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.pedropathing.follower.Follower;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -20,6 +21,7 @@ import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,15 +29,20 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 @Config
-public class IntakeCamera implements AutoCloseable {
+public class IntakeCameraSubsystem implements AutoCloseable {
 
-    public static double minBlobSize = 2000;
+    public static double minBlobSize = 1000;
     public static int yellowHueMin = 20;
-    public static int yellowHueMax = 40; // <- ^: good values
+    public static int yellowHueMax = 35; // <- ^: good values
+    public static double fox = 792.417;
+    public static double foy = 795.424;
+    public static double pollenDiameterInches = 2.8;
+    public static double centerX = 400;
+    public static double centerY = 300;
+
 
     private final Scalar yellowMin = new Scalar(yellowHueMin, 120, 80);
     private final Scalar yellowMax = new Scalar(yellowHueMax, 255, 255);
@@ -46,15 +53,15 @@ public class IntakeCamera implements AutoCloseable {
     private final Set<ColorBlobLocatorProcessor> initializedBlobProcessors = new HashSet<>();
     private CameraCalibration calibration;
 
-    public IntakeCamera(HardwareMap hm, VisionProcessor... processors) {
+    public IntakeCameraSubsystem(HardwareMap hm, VisionProcessor... processors) {
         portal = new VisionPortal.Builder()
                 .setCamera(hm.get(WebcamName.class, "cam"))
-                .setCameraResolution(new Size(640, 480)) // 480p
+                .setCameraResolution(new Size(800, 600)) // 480p
                 .enableLiveView(true)
                 .addProcessor(new VisionProcessor() {
                     @Override
                     public void init(int width, int height, CameraCalibration cameraCalibration) {
-                        synchronized (IntakeCamera.this) {
+                        synchronized (IntakeCameraSubsystem.this) {
                             calibration = cameraCalibration;
                             initializedBlobProcessors.clear();
                         }
@@ -72,7 +79,7 @@ public class IntakeCamera implements AutoCloseable {
                                         ColorBlobLocatorProcessor.BlobCriteria.BY_CONTOUR_AREA,
                                         minBlobSize, Double.MAX_VALUE);
                         Map<ColorRange, ColorBlobLocatorProcessor> processors;
-                        synchronized (IntakeCamera.this) {
+                        synchronized (IntakeCameraSubsystem.this) {
                             processors = new HashMap<>(blobProcessors);
                             for (ColorBlobLocatorProcessor processor : processors.values()) {
                                 if (initializedBlobProcessors.add(processor)) {
@@ -91,7 +98,7 @@ public class IntakeCamera implements AutoCloseable {
                                 Point center = blob.getBoxFit().center;
                                 centers.add(new Point(center.x, center.y));
                             }
-                            synchronized (IntakeCamera.this) {
+                            synchronized (IntakeCameraSubsystem.this) {
                                 blobCenters.put(entry.getKey(), centers);
                             }
                         }
@@ -146,26 +153,24 @@ public class IntakeCamera implements AutoCloseable {
 
     // returns x,y center points of blobs of the color given
     public synchronized List<Point> scanBlobs(ColorRange color) {
-        Objects.requireNonNull(color, "color");
-        ColorBlobLocatorProcessor processor = blobProcessors.get(color);
-        if (processor == null) {
-            int overlayColor = color == ColorRange.RED ? Color.RED
-                    : color == ColorRange.BLUE ? Color.BLUE
-                    : color == ColorRange.YELLOW ? Color.YELLOW : Color.WHITE;
-            processor = new ColorBlobLocatorProcessor.Builder()
-                    .setTargetColorRange(color == ColorRange.YELLOW
-                            ? new ColorRange(ColorSpace.HSV, yellowMin, yellowMax) : color)
+        blobProcessors.computeIfAbsent(color, range -> {
+            int overlayColor = range == ColorRange.RED ? Color.RED
+                    : range == ColorRange.BLUE ? Color.BLUE
+                      : range == ColorRange.YELLOW ? Color.YELLOW : Color.WHITE;
+            return new ColorBlobLocatorProcessor.Builder()
+                    .setTargetColorRange(range == ColorRange.YELLOW
+                            ? new ColorRange(ColorSpace.HSV, yellowMin, yellowMax) : range)
                     .setContourMode(ColorBlobLocatorProcessor.ContourMode.EXTERNAL_ONLY)
                     .setRoi(ImageRegion.entireFrame())
                     .setDrawContours(true)
                     .setContourColor(overlayColor)
                     .setBoxFitColor(overlayColor)
                     .build();
-            blobProcessors.put(color, processor);
-        }
+        });
+
         List<Point> centers = new ArrayList<>();
         for (Point center : blobCenters.getOrDefault(color, Collections.emptyList())) {
-            centers.add(new Point(center.x, center.y));
+            centers.add(center.clone());
         }
         return centers;
     }
@@ -175,9 +180,30 @@ public class IntakeCamera implements AutoCloseable {
         ColorBlobLocatorProcessor processor = blobProcessors.get(color);
         List<Rect> bounds = new ArrayList<>();
         for (ColorBlobLocatorProcessor.Blob blob : processor.getBlobs()) {
-            Rect bound = blob.getBoxFit().boundingRect();
+            Rect bound = Imgproc.boundingRect(blob.getContour());
             bounds.add(bound);
         }
         return bounds;
+    }
+
+    // returns distances from the camera to pollen in inches with full frame support
+    public List<Double> getDistance(ColorRange color) {
+        List<Double> distanceInch = new ArrayList<>();
+        for (Rect blob : scanBlobBounds(color)) {
+            double x = (blob.x + blob.width / 2.0 - centerX) / fox;
+            double y = (blob.y + blob.height / 2.0 - centerY) / foy;
+            double depth = pollenDiameterInches / 2 * (
+                    fox * Math.hypot(1, x) / blob.width + foy * Math.hypot(1, y) / blob.height);
+            distanceInch.add(depth * Math.sqrt(1 + x * x + y * y));
+        }
+        return distanceInch;
+    }
+
+    public List<Double> getXAnglesOffset(ColorRange color) {
+        List<Double> angles = new ArrayList<>();
+        for (Point center : scanBlobs(color)) {
+            angles.add(Math.toDegrees(Math.atan2(centerX - center.x, fox)));
+        }
+        return angles;
     }
 }
