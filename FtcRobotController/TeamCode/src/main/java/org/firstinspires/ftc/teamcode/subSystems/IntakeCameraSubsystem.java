@@ -7,6 +7,7 @@ import android.util.Size;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.pedropathing.follower.Follower;
+import com.pedropathing.math.Pose;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -32,16 +33,19 @@ import java.util.Map;
 import java.util.Set;
 
 @Config
-public class IntakeCameraSubsystem implements AutoCloseable {
+public class IntakeCameraSubsystem {
 
     public static double minBlobSize = 1000;
     public static int yellowHueMin = 20;
     public static int yellowHueMax = 35; // <- ^: good values
-    public static double fox = 792.417;
-    public static double foy = 795.424;
+    public static double fox = 792.4171351060593;
+    public static double foy = 795.423827473491;
     public static double pollenDiameterInches = 2.8;
     public static double centerX = 400;
     public static double centerY = 300;
+
+    double cameraHeightInch = 2;
+    double cameraAngle = 60; // Degrees below the horizon.
 
 
     private final Scalar yellowMin = new Scalar(yellowHueMin, 120, 80);
@@ -145,7 +149,6 @@ public class IntakeCameraSubsystem implements AutoCloseable {
         return portal.getFps();
     }
 
-    @Override
     public void close() {
         FtcDashboard.getInstance().stopCameraStream();
         portal.close();
@@ -190,13 +193,17 @@ public class IntakeCameraSubsystem implements AutoCloseable {
     public List<Double> getDistance(ColorRange color) {
         List<Double> distanceInch = new ArrayList<>();
         for (Rect blob : scanBlobBounds(color)) {
-            double x = (blob.x + blob.width / 2.0 - centerX) / fox;
-            double y = (blob.y + blob.height / 2.0 - centerY) / foy;
-            double depth = pollenDiameterInches / 2 * (
-                    fox * Math.hypot(1, x) / blob.width + foy * Math.hypot(1, y) / blob.height);
-            distanceInch.add(depth * Math.sqrt(1 + x * x + y * y));
+            distanceInch.add(getBlobDistance(blob));
         }
         return distanceInch;
+    }
+
+    private double getBlobDistance(Rect blob) {
+        double x = (blob.x + blob.width / 2.0 - centerX) / fox;
+        double y = (blob.y + blob.height / 2.0 - centerY) / foy;
+        double depth = pollenDiameterInches / 2 * (
+                fox * Math.hypot(1, x) / blob.width + foy * Math.hypot(1, y) / blob.height);
+        return depth * Math.sqrt(1 + x * x + y * y);
     }
 
     public List<Double> getXAnglesOffset(ColorRange color) {
@@ -205,5 +212,32 @@ public class IntakeCameraSubsystem implements AutoCloseable {
             angles.add(Math.toDegrees(Math.atan2(centerX - center.x, fox)));
         }
         return angles;
+    }
+
+    public List<Double> getYAnglesOffset(ColorRange color) {
+        List<Double> angles = new ArrayList<>();
+        for (Point center : scanBlobs(color)) {
+            angles.add(Math.toDegrees(Math.atan2(centerY - center.y, foy)));
+        }
+        return angles;
+    }
+
+    public List<Point> getElementLocation(ColorRange color, Follower follower) {
+        Pose base = follower.pose();
+        double pitch = Math.toRadians(cameraAngle);
+        List<Point> location = new ArrayList<>();
+        for (Rect blob : scanBlobBounds(color)) {
+            double distance = getBlobDistance(blob);
+            double xOffset = (centerX - blob.x - blob.width / 2.0) / fox;
+            double yOffset = (centerY - blob.y - blob.height / 2.0) / foy;
+            double forward = Math.cos(pitch) + yOffset * Math.sin(pitch);
+            double groundDistance = Math.sqrt(distance * distance - cameraHeightInch * cameraHeightInch);
+            double bearing = base.heading() + Math.atan2(xOffset, forward);
+
+            location.add(new Point(
+                    base.x() + groundDistance * Math.cos(bearing),
+                    base.y() + groundDistance * Math.sin(bearing)));
+        }
+        return location;
     }
 }
