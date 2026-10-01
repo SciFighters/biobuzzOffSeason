@@ -36,7 +36,7 @@ import java.util.Set;
 public class IntakeCameraSubsystem {
 
     public static double minBlobSize = 1000;
-    public static int yellowHueMin = 20;
+    public static int yellowHueMin = 0;
     public static int yellowHueMax = 35; // <- ^: good values
     public static double fox = 792.4171351060593;
     public static double foy = 795.423827473491;
@@ -45,7 +45,7 @@ public class IntakeCameraSubsystem {
     public static double centerY = 300;
 
     double cameraHeightInch = 2;
-    double cameraAngle = 60; // Degrees below the horizon.
+    double cameraPitch = 60; // Degrees below the horizon.
 
 
     private final Scalar yellowMin = new Scalar(yellowHueMin, 120, 80);
@@ -189,7 +189,6 @@ public class IntakeCameraSubsystem {
         return bounds;
     }
 
-    // returns distances from the camera to pollen in inches with full frame support
     public List<Double> getDistance(ColorRange color) {
         List<Double> distanceInch = new ArrayList<>();
         for (Rect blob : scanBlobBounds(color)) {
@@ -204,6 +203,11 @@ public class IntakeCameraSubsystem {
         double depth = pollenDiameterInches / 2 * (
                 fox * Math.hypot(1, x) / blob.width + foy * Math.hypot(1, y) / blob.height);
         return depth * Math.sqrt(1 + x * x + y * y);
+    }
+
+    public List<Double> getXAnglesOffset(Rect blob) {
+        return Collections.singletonList(Math.toDegrees(
+                Math.atan2(centerX - blob.x - blob.width / 2.0, fox)));
     }
 
     public List<Double> getXAnglesOffset(ColorRange color) {
@@ -222,21 +226,18 @@ public class IntakeCameraSubsystem {
         return angles;
     }
 
-    public List<Point> getElementLocation(ColorRange color, Follower follower) {
+    public double[] getElementLocation(Follower follower, ColorRange color) {
         Pose base = follower.pose();
-        double pitch = Math.toRadians(cameraAngle);
-        List<Point> location = new ArrayList<>();
+        double pitch = Math.toRadians(cameraPitch);
+        double[] location = {0,0};
         for (Rect blob : scanBlobBounds(color)) {
             double distance = getBlobDistance(blob);
-            double xOffset = (centerX - blob.x - blob.width / 2.0) / fox;
-            double yOffset = (centerY - blob.y - blob.height / 2.0) / foy;
-            double forward = Math.cos(pitch) + yOffset * Math.sin(pitch);
-            double groundDistance = Math.sqrt(distance * distance - cameraHeightInch * cameraHeightInch);
-            double bearing = base.heading() + Math.atan2(xOffset, forward);
+            double elementYaw = getXAnglesOffset(blob).get(0);
 
-            location.add(new Point(
-                    base.x() + groundDistance * Math.cos(bearing),
-                    base.y() + groundDistance * Math.sin(bearing)));
+            double xOffSet = Math.cos(base.heading() + Math.toRadians(elementYaw)) * distance;
+            double yOffSet = Math.sin(base.heading() + Math.toRadians(elementYaw)) * distance;
+            location[0] = base.x() + xOffSet;
+            location[1] = base.y() + yOffSet;
         }
         return location;
     }

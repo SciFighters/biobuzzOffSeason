@@ -1,6 +1,9 @@
 package org.firstinspires.ftc.teamcode.OpModes.tests;
 
+import com.pedropathing.drivetrain.DrivePowers;
 import com.pedropathing.follower.Follower;
+import com.pedropathing.follower.ManualDrive;
+import com.pedropathing.math.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.seattlesolvers.solverslib.command.button.GamepadButton;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
@@ -20,6 +23,7 @@ public class CameraTest extends ActionOpMode {
     private IntakeCameraSubsystem camera;
     GamepadEx gamepad;
     Follower follower;
+    private IntakeCameraCommands.ElementFocus focus;
 
     @Override
     public void initialize() {
@@ -35,12 +39,16 @@ public class CameraTest extends ActionOpMode {
             lockIn.schedule();
         });
 
+        follower.setPose(new Pose((141.5-9), 9, Math.PI / 2.0));
     }
 
     @Override
     public void run() {
         super.run();
-
+        DrivePowers powers = ManualDrive.fieldCentric(
+                gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x * -1,
+                follower.pose().heading()
+        );
 
         telemeter();
         follower.update();
@@ -57,10 +65,15 @@ public class CameraTest extends ActionOpMode {
     }
 
     public void telemeter() {
+        double[] locations = camera.getElementLocation(follower, ColorRange.YELLOW);
         List<Double> distances = camera.getDistance(ColorRange.YELLOW);
+
         multipleTelemetry.addData("distance",
                 distances.isEmpty() ? Double.NaN : distances.get(0));
+        multipleTelemetry.addData("current pose", follower.pose());
 
+        multipleTelemetry.addData("poseX", locations[0]);
+        multipleTelemetry.addData("poseY", locations[1]);
         multipleTelemetry.addData("Camera", camera.getCameraState());
         multipleTelemetry.addData("FPS", "%.1f", camera.getFps());
 
