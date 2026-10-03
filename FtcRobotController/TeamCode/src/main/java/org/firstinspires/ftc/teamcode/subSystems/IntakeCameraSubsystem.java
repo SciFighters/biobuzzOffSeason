@@ -41,7 +41,7 @@ public class IntakeCameraSubsystem {
     public static double centerY = 300;
 
     double cameraHeightInch = 2;
-    double cameraPitch = 60; // Degrees below the horizon.
+    double cameraPitchDegrees = 60; // Positive below the horizon.
 
 
     private final Scalar yellowMin = new Scalar(yellowHueMin, 120, 80);
@@ -184,34 +184,45 @@ public class IntakeCameraSubsystem {
         return bounds;
     }
 
+    // Estimates horizontal camera-to-blob distance in inches using the known pollen diameter.
     private double getBlobDistance(Rect blob) {
-        double x = (blob.x + blob.width / 2.0 - centerX) / fox;
-        double y = (blob.y + blob.height / 2.0 - centerY) / foy;
+        double left = (centerX - blob.x - blob.width / 2.0) / fox;
+        double up = (centerY - blob.y - blob.height / 2.0) / foy;
         double depth = pollenDiameterInches / 2 * (
-                fox * Math.hypot(1, x) / blob.width + foy * Math.hypot(1, y) / blob.height);
-        return depth * Math.sqrt(1 + x * x + y * y);
+                fox * Math.hypot(1, left) / blob.width + foy * Math.hypot(1, up) / blob.height);
+        double pitch = Math.toRadians(cameraPitchDegrees);
+        double forward = Math.cos(pitch) + up * Math.sin(pitch);
+        return depth * Math.hypot(forward, left);
     }
 
+    // Returns pitch-corrected robot-relative yaw; positive means left.
     public double getXAngleOffset(Rect blob) {
-        return Math.atan2(centerX - blob.x - blob.width / 2.0, fox);
+        double left = (centerX - blob.x - blob.width / 2.0) / fox;
+        double up = (centerY - blob.y - blob.height / 2.0) / foy;
+        double pitch = Math.toRadians(cameraPitchDegrees);
+        double forward = Math.cos(pitch) + up * Math.sin(pitch);
+        return Math.atan2(left, forward);
     }
 
     public double getYAngleOffset(Rect blob) {
-        return Math.atan2(centerY - blob.y - blob.height / 2.0, foy);
+        double left = (centerX - blob.x - blob.width / 2.0) / fox;
+        double up = (centerY - blob.y - blob.height / 2.0) / foy;
+        double pitch = Math.toRadians(cameraPitchDegrees);
+        double forward = Math.cos(pitch) + up * Math.sin(pitch);
+        double vertical = up * Math.cos(pitch) - Math.sin(pitch);
+        return Math.atan2(vertical, Math.hypot(forward, left));
     }
 
 
     public double[] getElementLocation(Follower follower, Rect blob) {
         Pose base = follower.pose();
-        double[] location = {0,0};
-        double distance = getBlobDistance(blob);
+
+        double distanceInches = getBlobDistance(blob);
         double elementYaw = getXAngleOffset(blob);
+        double heading = base.heading();
 
-        double xOffSet = Math.cos(base.heading() + Math.toRadians(elementYaw)) * distance;
-        double yOffSet = Math.sin(base.heading() + Math.toRadians(elementYaw)) * distance;
-        location[0] = base.x() + xOffSet;
-        location[1] = base.y() + yOffSet;
-
-        return location;
+        double xOffSet = Math.cos(heading + elementYaw) * distanceInches;
+        double yOffSet = Math.sin(heading + elementYaw) * distanceInches;
+        return new double[] {base.x() + xOffSet, base.y() + yOffSet};
     }
 }

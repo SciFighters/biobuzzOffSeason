@@ -31,7 +31,7 @@ public class IntakeCameraCommands {
         @Override
         public void initialize() {
             follower.manual(0, 0, 0);
-            pidController.setTolerance(1.0);
+            pidController.setTolerance(Math.toRadians(1.0));
             pidController.reset();
         }
 
@@ -40,21 +40,22 @@ public class IntakeCameraCommands {
             List<Rect> blobs = camera.scanBlobs(color);
             if (blobs.isEmpty()) {
                 follower.manual(0, 0, 0);
+                follower.update();
                 pidController.reset();
                 return;
             }
 
             blob = blobs.get(0);
-            pidController.setSetPoint(camera.getXAngleOffset(blob));
-            double currentYaw = follower.pose().heading();
-
-            follower.manual(0,0, pidController.calculate(currentYaw));
+            double angle = camera.getXAngleOffset(blob);
+            double turnPower = pidController.calculate(-angle, 0);
+            follower.manual(0, 0, turnPower);
             follower.update();
         }
 
         @Override
         public void end(boolean interrupted) {
             follower.manual(0, 0, 0);
+            follower.update();
         }
     }
 
@@ -63,7 +64,8 @@ public class IntakeCameraCommands {
         private final IntakeCameraSubsystem camera;
         private final ColorRange color;
         private double targetHeading = Double.NaN;
-        PIDController pidController = new PIDController(0.01, 0, 0);
+        private boolean hasCalculated;
+        PIDController pidController = new PIDController(0.01 * 180.0 / Math.PI, 0, 0);
 
         public ElementLockIn(Follower follower, IntakeCameraSubsystem camera, ColorRange color) {
             this.follower = follower;
@@ -77,7 +79,7 @@ public class IntakeCameraCommands {
             targetHeading = Double.NaN;
             follower.manual(0, 0, 0);
             pidController.reset();
-            pidController.setTolerance(1.0);
+            pidController.setTolerance(Math.toRadians(1.0));
             pidController.setSetPoint(0);
             List<Rect> blobs = camera.scanBlobs(color);
             if (blobs.isEmpty()) return;
@@ -88,9 +90,15 @@ public class IntakeCameraCommands {
 
         @Override
         public void execute() {
+            if (Double.isNaN(targetHeading)) {
+                follower.manual(0, 0, 0);
+                follower.update();
+                return;
+            }
+
             double error = Angle.error(follower.pose().heading(), targetHeading);
-            double yaw = pidController.calculate(Math.toDegrees(error));
-            follower.manual(0, 0, yaw);
+            double turnPower = pidController.calculate(-error, 0);
+            follower.manual(0, 0, turnPower);
             follower.update();
         }
 
