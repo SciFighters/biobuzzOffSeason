@@ -30,13 +30,19 @@ public class CameraTest extends ActionOpMode {
         follower.manual(0, 0, 0);
         camera = new IntakeCameraSubsystem(hardwareMap);
         gamepad = new GamepadEx(gamepad1);
-        IntakeCameraCommands.ElementFocus focus = new IntakeCameraCommands.ElementFocus(follower, camera, ColorRange.YELLOW);
+        focus = new IntakeCameraCommands.ElementFocus(follower, camera, ColorRange.YELLOW);
         IntakeCameraCommands.ElementLockIn lockIn = new IntakeCameraCommands.ElementLockIn(follower, camera, ColorRange.YELLOW);
-        new GamepadButton(gamepad, GamepadKeys.Button.A).toggleWhenPressed(focus);
+        IntakeCameraCommands.ElementPathFinder pathFinder = new IntakeCameraCommands.ElementPathFinder(follower, camera, ColorRange.YELLOW);
+        new GamepadButton(gamepad, GamepadKeys.Button.A).whenPressed(() -> {
+            pathFinder.cancel();
+            focus.schedule();
+        });
         new GamepadButton(gamepad, GamepadKeys.Button.B).whenPressed(() -> {
             focus.cancel();
-            lockIn.schedule();
+            pathFinder.schedule();
+
         });
+
 
         follower.setPose(new Pose((141.5-9), 9, Math.PI / 2.0));
     }
@@ -64,7 +70,7 @@ public class CameraTest extends ActionOpMode {
     }
 
     public void telemeter() {
-        List<Rect> blobs = camera.scanBlobBounds(ColorRange.YELLOW);
+        List<Rect> blobs = camera.scanBlobsByDistance(ColorRange.YELLOW);
         double[] locations = {Double.NaN, Double.NaN};
         for (Rect blob : blobs) {
             if (blob.width > 0 && blob.height > 0) {
@@ -79,6 +85,9 @@ public class CameraTest extends ActionOpMode {
         multipleTelemetry.addData("State", camera.getCameraState());
         multipleTelemetry.addData("FPS", "%.1f", camera.getFps());
         multipleTelemetry.addData("Yellow blobs", blobs.size());
+        multipleTelemetry.addData("Focus active", focus.isScheduled());
+        multipleTelemetry.addData("Target angle (deg)", blobs.isEmpty()
+                ? Double.NaN : Math.toDegrees(camera.getXAngleOffset(blobs.get(0))));
 
         multipleTelemetry.addLine("position:");
         multipleTelemetry.addData("Position (in)", "X: %.1f | Y: %.1f", current.x(), current.y());

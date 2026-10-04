@@ -21,12 +21,13 @@ public class IntakeCameraCommands {
         private final ColorRange color;
         Rect blob;
 
-        PIDController pidController = new PIDController(0.01,0,0);
+        PIDController pidController = new PIDController(0.01 * 180.0 / Math.PI, 0, 0);
 
         public ElementFocus(Follower follower, IntakeCameraSubsystem camera, ColorRange color) {
             this.follower = follower;
             this.camera = camera;
             this.color = color;
+            camera.scanBlobs(color);
         }
 
         @Override
@@ -38,7 +39,7 @@ public class IntakeCameraCommands {
 
         @Override
         public void execute() {
-            List<Rect> blobs = camera.scanBlobs(color);
+            List<Rect> blobs = camera.scanBlobsByDistance(color);
             if (blobs.isEmpty()) {
                 follower.manual(0, 0, 0);
                 follower.update();
@@ -49,6 +50,8 @@ public class IntakeCameraCommands {
             blob = blobs.get(0);
             double angle = camera.getXAngleOffset(blob);
             double turnPower = pidController.calculate(-angle, 0);
+            if (pidController.atSetPoint()) turnPower = 0;
+            turnPower = Math.max(-1.0, Math.min(1.0, turnPower));
             follower.manual(0, 0, turnPower);
             follower.update();
         }

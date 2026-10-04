@@ -26,6 +26,7 @@ import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -177,6 +178,12 @@ public class IntakeCameraSubsystem {
         return bounds;
     }
 
+    public List<Rect> scanBlobsByDistance(ColorRange color) {
+        List<Rect> blobs = scanBlobs(color);
+        blobs.sort(Comparator.comparingDouble(this::getBlobDistance));
+        return blobs;
+    }
+
     public synchronized List<Rect> scanBlobBounds(ColorRange color) {
         scanBlobs(color);
         ColorBlobLocatorProcessor processor = blobProcessors.get(color);
@@ -188,33 +195,20 @@ public class IntakeCameraSubsystem {
         return bounds;
     }
 
-    // Estimates horizontal camera-to-blob distance in inches using the known pollen diameter.
     private double getBlobDistance(Rect blob) {
-        double left = (centerX - blob.x - blob.width / 2.0) / fox;
-        double up = (centerY - blob.y - blob.height / 2.0) / foy;
+        double x = (blob.x + blob.width / 2.0 - centerX) / fox;
+        double y = (blob.y + blob.height / 2.0 - centerY) / foy;
         double depth = pollenDiameterInches / 2 * (
-                fox * Math.hypot(1, left) / blob.width + foy * Math.hypot(1, up) / blob.height);
-        double pitch = Math.toRadians(cameraPitchDegrees);
-        double forward = Math.cos(pitch) + up * Math.sin(pitch);
-        return depth * Math.hypot(forward, left);
+            fox * Math.hypot(1, x) / blob.width + foy * Math.hypot(1, y) / blob.height);
+        return depth * Math.sqrt(1 + x * x + y * y);
     }
 
-    // Returns pitch-corrected robot-relative yaw; positive means left.
     public double getXAngleOffset(Rect blob) {
-        double left = (centerX - blob.x - blob.width / 2.0) / fox;
-        double up = (centerY - blob.y - blob.height / 2.0) / foy;
-        double pitch = Math.toRadians(cameraPitchDegrees);
-        double forward = Math.cos(pitch) + up * Math.sin(pitch);
-        return Math.atan2(left, forward);
+        return Math.atan2(centerX - blob.x - blob.width / 2.0, fox);
     }
 
     public double getYAngleOffset(Rect blob) {
-        double left = (centerX - blob.x - blob.width / 2.0) / fox;
-        double up = (centerY - blob.y - blob.height / 2.0) / foy;
-        double pitch = Math.toRadians(cameraPitchDegrees);
-        double forward = Math.cos(pitch) + up * Math.sin(pitch);
-        double vertical = up * Math.cos(pitch) - Math.sin(pitch);
-        return Math.atan2(vertical, Math.hypot(forward, left));
+        return Math.atan2(centerY - blob.y - blob.height / 2.0, foy);
     }
 
     public double[] getElementLocation(Follower follower, Rect blob) {
@@ -228,20 +222,19 @@ public class IntakeCameraSubsystem {
         double yOffSet = Math.sin(heading + elementYaw) * distanceInches;
         return new double[] {base.x() + xOffSet, base.y() + yOffSet};
     }
-}
 
-public Path getElementsPath(Follower follower, ColorRange color) {
-    List<Path> segments = new ArrayList<>();
-    Pose start = follower.pose();
-    for (Rect blob : scanBlobs(color)) {
-        double[] location = getElementLocation(follower, blob);
-        double dx = location[0] - start.x();
-        double dy = location[1] - start.y();
+    public Path getElementsPath(Follower follower, ColorRange color) {
+        List<Path> segments = new ArrayList<>();
+        Pose start = follower.pose();
+        for (Rect blob : scanBlobsByDistance(color)) {
+            double[] location = getElementLocation(follower, blob);
+            double dx = location[0] - start.x();
+            double dy = location[1] - start.y();
 
-        Pose target = new Pose(location[0], location[1], Math.atan2(dy, dx));
-        segments.add(line(start, target).linear(start.heading(), target.heading()));
-        start = target;
+            Pose target = new Pose(location[0], location[1], Math.atan2(dy, dx));
+            segments.add(line(start, target).linear(start.heading(), target.heading()));
+            start = target;
+        }
+        return path(segments.toArray(new Path[0]));
     }
-    return path(segments.toArray(new Path[0]));
 }
-
