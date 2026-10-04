@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.subSystems;
 
+import static com.pedropathing.api.Paths.line;
+import static com.pedropathing.api.Paths.path;
+
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.util.Size;
@@ -7,6 +10,7 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.math.Pose;
+import com.pedropathing.paths.Path;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.internal.camera.calibration.CameraCalibration;
@@ -213,7 +217,6 @@ public class IntakeCameraSubsystem {
         return Math.atan2(vertical, Math.hypot(forward, left));
     }
 
-
     public double[] getElementLocation(Follower follower, Rect blob) {
         Pose base = follower.pose();
 
@@ -226,3 +229,19 @@ public class IntakeCameraSubsystem {
         return new double[] {base.x() + xOffSet, base.y() + yOffSet};
     }
 }
+
+public Path getElementsPath(Follower follower, ColorRange color) {
+    List<Path> segments = new ArrayList<>();
+    Pose start = follower.pose();
+    for (Rect blob : scanBlobs(color)) {
+        double[] location = getElementLocation(follower, blob);
+        double dx = location[0] - start.x();
+        double dy = location[1] - start.y();
+
+        Pose target = new Pose(location[0], location[1], Math.atan2(dy, dx));
+        segments.add(line(start, target).linear(start.heading(), target.heading()));
+        start = target;
+    }
+    return path(segments.toArray(new Path[0]));
+}
+

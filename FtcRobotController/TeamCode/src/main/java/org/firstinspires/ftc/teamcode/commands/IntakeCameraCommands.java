@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.commands;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.pedropathing.follower.Follower;
+import com.pedropathing.paths.Path;
 import com.pedropathing.utils.Angle;
 import com.seattlesolvers.solverslib.command.CommandBase;
 import com.seattlesolvers.solverslib.controller.PIDController;
@@ -125,6 +126,35 @@ public class IntakeCameraCommands {
             this.camera = camera;
             this.color = color;
             camera.scanBlobs(color);
+        }
+
+        @Override
+        public void initialize() {
+            pathCommand = null;
+            follower.manual(0, 0, 0);
+            follower.update();
+
+            Path path = camera.getElementsPath(follower, color);
+            pathCommand = new FollowPathCommand(follower, path);
+            pathCommand.initialize();
+        }
+
+        @Override
+        public void execute() {
+            pathCommand.execute();
+            follower.update();
+        }
+
+        @Override
+        public boolean isFinished() {
+            return pathCommand.isFinished();
+        }
+
+        @Override
+        public void end(boolean interrupted) {
+            pathCommand.end(interrupted);
+            follower.manual(0, 0, 0);
+            follower.update();
         }
     }
 }
