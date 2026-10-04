@@ -1,14 +1,17 @@
 package org.firstinspires.ftc.teamcode.subSystems;
 
+import static com.pedropathing.api.Paths.line;
+import static com.pedropathing.api.Paths.path;
+
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.util.Size;
-
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.pedropathing.follower.Follower;
+import com.pedropathing.math.Pose;
+import com.pedropathing.paths.Path;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.internal.camera.calibration.CameraCalibration;
 import org.firstinspires.ftc.vision.VisionPortal;
@@ -18,13 +21,12 @@ import org.firstinspires.ftc.vision.opencv.ColorRange;
 import org.firstinspires.ftc.vision.opencv.ColorSpace;
 import org.firstinspires.ftc.vision.opencv.ImageRegion;
 import org.opencv.core.Mat;
-import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
-
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -32,16 +34,19 @@ import java.util.Map;
 import java.util.Set;
 
 @Config
-public class IntakeCameraSubsystem implements AutoCloseable {
+public class IntakeCameraSubsystem {
 
     public static double minBlobSize = 1000;
-    public static int yellowHueMin = 20;
+    public static int yellowHueMin = 0;
     public static int yellowHueMax = 35; // <- ^: good values
-    public static double fox = 792.417;
-    public static double foy = 795.424;
+    public static double fox = 792.4171351060593;
+    public static double foy = 795.423827473491;
     public static double pollenDiameterInches = 2.8;
     public static double centerX = 400;
     public static double centerY = 300;
+
+    double cameraHeightInch = 2;
+    double cameraPitchDegrees = 60; // Positive below the horizon.
 
 
     private final Scalar yellowMin = new Scalar(yellowHueMin, 120, 80);
@@ -49,7 +54,7 @@ public class IntakeCameraSubsystem implements AutoCloseable {
 
     private final VisionPortal portal;
     private final Map<ColorRange, ColorBlobLocatorProcessor> blobProcessors = new HashMap<>();
-    private final Map<ColorRange, List<Point>> blobCenters = new HashMap<>();
+    private final Map<ColorRange, List<Rect>> blobBounds = new HashMap<>();
     private final Set<ColorBlobLocatorProcessor> initializedBlobProcessors = new HashSet<>();
     private CameraCalibration calibration;
 
@@ -93,13 +98,12 @@ public class IntakeCameraSubsystem implements AutoCloseable {
                             processor.removeAllFilters();
                             processor.addFilter(areaFilter);
                             drawContexts.put(processor, processor.processFrame(frame, captureTimeNanos));
-                            List<Point> centers = new ArrayList<>();
+                            List<Rect> bounds = new ArrayList<>();
                             for (ColorBlobLocatorProcessor.Blob blob : processor.getBlobs()) {
-                                Point center = blob.getBoxFit().center;
-                                centers.add(new Point(center.x, center.y));
+                                bounds.add(Imgproc.boundingRect(blob.getContour()));
                             }
                             synchronized (IntakeCameraSubsystem.this) {
-                                blobCenters.put(entry.getKey(), centers);
+                                blobBounds.put(entry.getKey(), bounds);
                             }
                         }
                         return drawContexts;
@@ -145,14 +149,13 @@ public class IntakeCameraSubsystem implements AutoCloseable {
         return portal.getFps();
     }
 
-    @Override
     public void close() {
         FtcDashboard.getInstance().stopCameraStream();
         portal.close();
     }
 
-    // returns x,y center points of blobs of the color given
-    public synchronized List<Point> scanBlobs(ColorRange color) {
+    // Returns bounding rectangles of blobs of the given color.
+    public synchronized List<Rect> scanBlobs(ColorRange color) {
         blobProcessors.computeIfAbsent(color, range -> {
             int overlayColor = range == ColorRange.RED ? Color.RED
                     : range == ColorRange.BLUE ? Color.BLUE
@@ -168,11 +171,17 @@ public class IntakeCameraSubsystem implements AutoCloseable {
                     .build();
         });
 
-        List<Point> centers = new ArrayList<>();
-        for (Point center : blobCenters.getOrDefault(color, Collections.emptyList())) {
-            centers.add(center.clone());
+        List<Rect> bounds = new ArrayList<>();
+        for (Rect bound : blobBounds.getOrDefault(color, Collections.emptyList())) {
+            bounds.add(bound.clone());
         }
-        return centers;
+        return bounds;
+    }
+
+    public List<Rect> scanBlobsByDistance(ColorRange color) {
+        List<Rect> blobs = scanBlobs(color);
+        blobs.sort(Comparator.comparingDouble(this::getBlobDistance));
+        return blobs;
     }
 
     public synchronized List<Rect> scanBlobBounds(ColorRange color) {
@@ -186,24 +195,46 @@ public class IntakeCameraSubsystem implements AutoCloseable {
         return bounds;
     }
 
-    // returns distances from the camera to pollen in inches with full frame support
-    public List<Double> getDistance(ColorRange color) {
-        List<Double> distanceInch = new ArrayList<>();
-        for (Rect blob : scanBlobBounds(color)) {
-            double x = (blob.x + blob.width / 2.0 - centerX) / fox;
-            double y = (blob.y + blob.height / 2.0 - centerY) / foy;
-            double depth = pollenDiameterInches / 2 * (
-                    fox * Math.hypot(1, x) / blob.width + foy * Math.hypot(1, y) / blob.height);
-            distanceInch.add(depth * Math.sqrt(1 + x * x + y * y));
-        }
-        return distanceInch;
+    private double getBlobDistance(Rect blob) {
+        double x = (blob.x + blob.width / 2.0 - centerX) / fox;
+        double y = (blob.y + blob.height / 2.0 - centerY) / foy;
+        double depth = pollenDiameterInches / 2 * (
+            fox * Math.hypot(1, x) / blob.width + foy * Math.hypot(1, y) / blob.height);
+        return depth * Math.sqrt(1 + x * x + y * y);
     }
 
-    public List<Double> getXAnglesOffset(ColorRange color) {
-        List<Double> angles = new ArrayList<>();
-        for (Point center : scanBlobs(color)) {
-            angles.add(Math.toDegrees(Math.atan2(centerX - center.x, fox)));
+    public double getXAngleOffset(Rect blob) {
+        return Math.atan2(centerX - blob.x - blob.width / 2.0, fox);
+    }
+
+    public double getYAngleOffset(Rect blob) {
+        return Math.atan2(centerY - blob.y - blob.height / 2.0, foy);
+    }
+
+    public double[] getElementLocation(Follower follower, Rect blob) {
+        Pose base = follower.pose();
+
+        double distanceInches = getBlobDistance(blob);
+        double elementYaw = getXAngleOffset(blob);
+        double heading = base.heading();
+
+        double xOffSet = Math.cos(heading + elementYaw) * distanceInches;
+        double yOffSet = Math.sin(heading + elementYaw) * distanceInches;
+        return new double[] {base.x() + xOffSet, base.y() + yOffSet};
+    }
+
+    public Path getElementsPath(Follower follower, ColorRange color) {
+        List<Path> segments = new ArrayList<>();
+        Pose start = follower.pose();
+        for (Rect blob : scanBlobsByDistance(color)) {
+            double[] location = getElementLocation(follower, blob);
+            double dx = location[0] - start.x();
+            double dy = location[1] - start.y();
+
+            Pose target = new Pose(location[0], location[1], Math.atan2(dy, dx));
+            segments.add(line(start, target).linear(start.heading(), target.heading()));
+            start = target;
         }
-        return angles;
+        return segments.isEmpty() ? null : path(segments.toArray(new Path[0]));
     }
 }

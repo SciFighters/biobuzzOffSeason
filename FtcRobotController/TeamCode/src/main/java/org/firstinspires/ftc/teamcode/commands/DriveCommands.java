@@ -23,8 +23,8 @@ public final class DriveCommands {
         @Override
         public void execute() {
             drive.setTeleopDrive(
-                    gamepad.getLeftY(),
-                    -gamepad.getLeftX(),
+                    -gamepad.getLeftY(),
+                    gamepad.getLeftX(),
                     -gamepad.getRightX()
             );
         }
