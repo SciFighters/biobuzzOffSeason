@@ -138,24 +138,25 @@ public class IntakeCameraCommands {
             follower.update();
 
             Path path = camera.getElementsPath(follower, color);
+            if (path == null) return;
             pathCommand = new FollowPathCommand(follower, path);
             pathCommand.initialize();
         }
 
         @Override
         public void execute() {
-            pathCommand.execute();
+            if (pathCommand != null) pathCommand.execute();
             follower.update();
         }
 
         @Override
         public boolean isFinished() {
-            return pathCommand.isFinished();
+            return pathCommand == null || pathCommand.isFinished();
         }
 
         @Override
         public void end(boolean interrupted) {
-            pathCommand.end(interrupted);
+            if (pathCommand != null) pathCommand.end(interrupted);
             follower.manual(0, 0, 0);
             follower.update();
         }

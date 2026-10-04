@@ -235,6 +235,6 @@ public class IntakeCameraSubsystem {
             segments.add(line(start, target).linear(start.heading(), target.heading()));
             start = target;
         }
-        return path(segments.toArray(new Path[0]));
+        return segments.isEmpty() ? null : path(segments.toArray(new Path[0]));
     }
 }
