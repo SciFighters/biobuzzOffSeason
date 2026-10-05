@@ -37,6 +37,7 @@ import java.util.Set;
 public class IntakeCameraSubsystem {
 
     public static double minBlobSize = 1000;
+    public static double elementRatio = 0.02;
     public static int yellowHueMin = 0;
     public static int yellowHueMax = 35; // <- ^: good values
     public static double fox = 792.4171351060593;
@@ -179,7 +180,12 @@ public class IntakeCameraSubsystem {
     }
 
     public List<Rect> scanBlobsByDistance(ColorRange color) {
-        List<Rect> blobs = scanBlobs(color);
+        List<Rect> blobs = new ArrayList<>();
+        for (Rect blob : scanBlobs(color)) {
+            if (isSingleElement(blob)) {
+                blobs.add(blob);
+            }
+        }
         blobs.sort(Comparator.comparingDouble(this::getBlobDistance));
         return blobs;
     }
@@ -236,5 +242,9 @@ public class IntakeCameraSubsystem {
             start = target;
         }
         return segments.isEmpty() ? null : path(segments.toArray(new Path[0]));
+    }
+
+    public boolean isSingleElement(Rect blob) {
+        return Math.abs(((double) blob.height / blob.width - 1)) <= elementRatio;
     }
 }
