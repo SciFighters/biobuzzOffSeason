@@ -5,23 +5,20 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.math.Pose;
 
 public class AutoShooter {
-    PoseFactory poseFactory;
-    final Pose firstCell, secondCell;
+    final PoseFactory poseFactory = PoseFactory.degrees();
     private final Calibration[] calibrations = {calibration(1,2,3)};//arbitrary
     private final Follower follower;
+    private final LimelightSubsystem limelightSubsystem;
 
-    public AutoShooter(Follower follower){
-        poseFactory = (GlobalVariables.teamColor == GlobalVariables.TeamColor.RED) ?
-                PoseFactory.degrees() :
-                PoseFactory.degrees().rotateAround(new Pose(70.75,70.75),180);
-        firstCell = poseFactory.of(58,53.75,0);
-        secondCell = poseFactory.of(58,87.75,0);
+    public AutoShooter(Follower follower, LimelightSubsystem limelightSubsystem){
         this.follower = follower;
+        this.limelightSubsystem = limelightSubsystem;
     }
 
-    public Calibration getWantedState(){
-        //todo: change later to limelight detection for which cell it is
-        double distance = follower.pose().distance(firstCell);
+    public Calibration getDesiredState(){
+        LimelightSubsystem.Cell cell = limelightSubsystem.getCurrentCell();
+        //todo: in the first test change to a constant cell
+        double distance = follower.pose().distance(cell.getPose());
         Calibration min = calibration(-10,0,0);
         Calibration max = calibration(200, 0, 0);
         for (Calibration calibration : calibrations) {
@@ -40,6 +37,12 @@ public class AutoShooter {
                 (lowerRatio * max.RPM + higherRatio * min.RPM) * ratio);
 
 
+    }
+    private double getTurretAngle(){
+        LimelightSubsystem.Cell cell = limelightSubsystem.lastCell;
+        Pose pose = follower.localizer.pose();
+        double heading = pose.heading();
+        return (Math.atan2(cell.getPose().y() - pose.y(),cell.getPose().x() - pose.x()) - heading)%360;
     }
 
 
