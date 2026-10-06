@@ -70,7 +70,12 @@ dependencies {
 
     implementation "org.solverslib:core:0.3.6"
     implementation "org.solverslib:pedroPathing:0.3.6"
+    // JGraphT 1.4.0 is the last release for Java 8, matching the FTC build.
+    implementation "org.jgrapht:jgrapht-core:1.4.0"
     implementation "dev.frozenmilk.sinister:Sloth:0.2.4"
     implementation "com.acmerobotics.slothboard:dashboard:0.2.4+0.5.1"
     implementation "com.bylazar.sloth:fullpanels:0.2.4+1.0.12"
+
+    testImplementation "junit:junit:4.13.2"
+    testImplementation "org.mockito:mockito-core:5.14.2"
 }
