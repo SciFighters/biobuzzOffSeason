@@ -71,30 +71,26 @@ public class CameraTest extends ActionOpMode {
 
     public void telemeter() {
         List<Rect> blobs = camera.scanBlobsByDistance(ColorRange.YELLOW);
-        double[] locations = {Double.NaN, Double.NaN};
-        for (Rect blob : blobs) {
-            if (blob.width > 0 && blob.height > 0) {
-                locations = camera.getElementLocation(follower, blob);
-                break;
-            }
-        }
         Pose current = follower.pose();
-        double distance = Math.hypot(locations[0] - current.x(), locations[1] - current.y());
+        Rect nearest = blobs.isEmpty() ? null : blobs.get(0);
+        double[] location = nearest == null ? new double[] {Double.NaN, Double.NaN}
+                : camera.getElementLocation(follower, nearest);
+        double distance = Math.hypot(location[0] - current.x(), location[1] - current.y());
 
         multipleTelemetry.addLine("camera:");
         multipleTelemetry.addData("State", camera.getCameraState());
         multipleTelemetry.addData("FPS", "%.1f", camera.getFps());
-        multipleTelemetry.addData("Yellow blobs", blobs.size());
+        multipleTelemetry.addData("Yellow elements", blobs.size());
         multipleTelemetry.addData("Focus active", focus.isScheduled());
-        multipleTelemetry.addData("Target angle (deg)", blobs.isEmpty()
-                ? Double.NaN : Math.toDegrees(camera.getXAngleOffset(blobs.get(0))));
+        multipleTelemetry.addData("Target angle (deg)", nearest == null
+                ? Double.NaN : Math.toDegrees(camera.getXAngleOffset(nearest)));
 
         multipleTelemetry.addLine("position:");
         multipleTelemetry.addData("Position (in)", "X: %.1f | Y: %.1f", current.x(), current.y());
         multipleTelemetry.addData("Heading (deg)", "%.1f", Math.toDegrees(current.heading()));
 
         multipleTelemetry.addLine("pollen:");
-        multipleTelemetry.addData("Target position (in)", "X: %.1f | Y: %.1f", locations[0], locations[1]);
+        multipleTelemetry.addData("Target position (in)", "X: %.1f | Y: %.1f", location[0], location[1]);
         multipleTelemetry.addData("Distance (in)", "%.1f", distance);
 
         multipleTelemetry.update();

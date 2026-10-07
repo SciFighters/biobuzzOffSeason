@@ -35,7 +35,7 @@ import java.util.Set;
 public class IntakeCameraSubsystem {
 
     public static double minBlobSize = 1000;
-    public static double elementRatio = 0.02;
+    public static double elementRatio = 0.2;
     public static int yellowHueMin = 0;
     public static int yellowHueMax = 35; // <- ^: good values
     public static double fox = 792.4171351060593;
@@ -235,7 +235,7 @@ public class IntakeCameraSubsystem {
             double[] location = getElementLocation(follower, blob);
             targets.add(new Pose(location[0], location[1]));
         }
-        return targets.isEmpty() ? null : HeldKarpPath.plan(start, targets);
+        return HeldKarpPath.plan(start, targets);
     }
 
     public boolean isSingleElement(Rect blob) {

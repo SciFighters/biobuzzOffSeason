@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.commands;
 
-import com.acmerobotics.dashboard.config.Config;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.paths.Path;
 import com.pedropathing.utils.Angle;
@@ -13,45 +12,39 @@ import org.opencv.core.Rect;
 
 import java.util.List;
 
-@Config
 public class IntakeCameraCommands {
     public static class ElementFocus extends CommandBase {
         private final Follower follower;
         private final IntakeCameraSubsystem camera;
         private final ColorRange color;
-        Rect blob;
 
-        PIDController pidController = new PIDController(0.01 * 180.0 / Math.PI, 0, 0);
+        private final PIDController pidController = new PIDController(0.01 * 180.0 / Math.PI, 0, 0);
 
         public ElementFocus(Follower follower, IntakeCameraSubsystem camera, ColorRange color) {
             this.follower = follower;
             this.camera = camera;
             this.color = color;
+            pidController.setTolerance(Math.toRadians(1.0));
             camera.scanBlobs(color);
         }
 
         @Override
         public void initialize() {
             follower.manual(0, 0, 0);
-            pidController.setTolerance(Math.toRadians(1.0));
             pidController.reset();
         }
 
         @Override
         public void execute() {
             List<Rect> blobs = camera.scanBlobsByDistance(color);
+            double turnPower = 0;
             if (blobs.isEmpty()) {
-                follower.manual(0, 0, 0);
-                follower.update();
                 pidController.reset();
-                return;
+            } else {
+                turnPower = pidController.calculate(0, camera.getXAngleOffset(blobs.get(0)));
+                if (pidController.atSetPoint()) turnPower = 0;
+                turnPower = Math.max(-1.0, Math.min(1.0, turnPower));
             }
-
-            blob = blobs.get(0);
-            double angle = camera.getXAngleOffset(blob);
-            double turnPower = pidController.calculate(-angle, 0);
-            if (pidController.atSetPoint()) turnPower = 0;
-            turnPower = Math.max(-1.0, Math.min(1.0, turnPower));
             follower.manual(0, 0, turnPower);
             follower.update();
         }
@@ -68,47 +61,40 @@ public class IntakeCameraCommands {
         private final IntakeCameraSubsystem camera;
         private final ColorRange color;
         private double targetHeading = Double.NaN;
-        private boolean hasCalculated;
-        PIDController pidController = new PIDController(0.01 * 180.0 / Math.PI, 0, 0);
+        private final PIDController pidController = new PIDController(0.01 * 180.0 / Math.PI, 0, 0);
 
         public ElementLockIn(Follower follower, IntakeCameraSubsystem camera, ColorRange color) {
             this.follower = follower;
             this.camera = camera;
             this.color = color;
+            pidController.setTolerance(Math.toRadians(1.0));
             camera.scanBlobs(color);
         }
 
         @Override
         public void initialize() {
-            targetHeading = Double.NaN;
             follower.manual(0, 0, 0);
             pidController.reset();
-            pidController.setTolerance(Math.toRadians(1.0));
-            pidController.setSetPoint(0);
-            List<Rect> blobs = camera.scanBlobs(color);
-            if (blobs.isEmpty()) return;
-            Rect blob = blobs.get(0);
-            double angle = camera.getXAngleOffset(blob);
-            targetHeading = Angle.normalize(follower.pose().heading() + angle);
+            List<Rect> blobs = camera.scanBlobsByDistance(color);
+            targetHeading = blobs.isEmpty() ? Double.NaN
+                    : follower.pose().heading() + camera.getXAngleOffset(blobs.get(0));
         }
 
         @Override
         public void execute() {
-            if (Double.isNaN(targetHeading)) {
-                follower.manual(0, 0, 0);
-                follower.update();
-                return;
+            double turnPower = 0;
+            if (!Double.isNaN(targetHeading)) {
+                double error = Angle.error(follower.pose().heading(), targetHeading);
+                turnPower = pidController.calculate(0, error);
+                turnPower = Math.max(-1.0, Math.min(1.0, turnPower));
             }
-
-            double error = Angle.error(follower.pose().heading(), targetHeading);
-            double turnPower = pidController.calculate(-error, 0);
             follower.manual(0, 0, turnPower);
             follower.update();
         }
 
         @Override
         public boolean isFinished() {
-            return pidController.atSetPoint();
+            return Double.isNaN(targetHeading) || pidController.atSetPoint();
         }
 
         @Override
@@ -133,19 +119,16 @@ public class IntakeCameraCommands {
 
         @Override
         public void initialize() {
-            pathCommand = null;
             follower.manual(0, 0, 0);
             follower.update();
 
             Path path = camera.getElementsPath(follower, color);
-            if (path == null) return;
-            pathCommand = new FollowPathCommand(follower, path);
-            pathCommand.initialize();
+            pathCommand = path == null ? null : new FollowPathCommand(follower, path);
+            if (pathCommand != null) pathCommand.initialize();
         }
 
         @Override
         public void execute() {
-            if (pathCommand != null) pathCommand.execute();
             follower.update();
         }
 
@@ -156,8 +139,8 @@ public class IntakeCameraCommands {
 
         @Override
         public void end(boolean interrupted) {
-            if (pathCommand != null) pathCommand.end(interrupted);
             follower.manual(0, 0, 0);
+            if (pathCommand != null) pathCommand.end(interrupted);
             follower.update();
         }
     }

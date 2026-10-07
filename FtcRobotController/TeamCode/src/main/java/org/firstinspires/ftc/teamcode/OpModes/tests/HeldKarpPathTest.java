@@ -11,7 +11,9 @@ import org.firstinspires.ftc.teamcode.Utilities.ActionOpMode;
 import org.firstinspires.ftc.teamcode.Utilities.HeldKarpPath;
 import org.firstinspires.ftc.teamcode.subSystems.DriveSubsystem;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 @Autonomous(name = "HeldKarpPathTester", group = "Test")
@@ -39,7 +41,10 @@ public class HeldKarpPathTest extends ActionOpMode {
         drive.startTeleopDrive();
         drive.periodic();
 
-        Path route = HeldKarpPath.plan(start, points);
+        List<Pose> targets = new ArrayList<>(points);
+        targets.sort(Comparator.comparingDouble(point ->
+                Math.hypot(point.x() - start.x(), point.y() - start.y())));
+        Path route = HeldKarpPath.plan(start, targets);
         pathCommand = new FollowPathCommand(follower, route, true, 0.4);
         pathCommand.addRequirements(drive);
     }
