@@ -9,7 +9,7 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.math.Pose;
 import com.pedropathing.paths.Path;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import org.firstinspires.ftc.teamcode.Utilities.HeldKarpPath;
+import org.firstinspires.ftc.teamcode.Utilities.BruteForcePath;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.internal.camera.calibration.CameraCalibration;
 import org.firstinspires.ftc.vision.VisionPortal;
@@ -227,15 +227,8 @@ public class IntakeCameraSubsystem {
         return new double[] {base.x() + xOffSet, base.y() + yOffSet};
     }
 
-    public Path getElementsPath(Follower follower, ColorRange color) {
-        Pose start = follower.pose();
-        List<Pose> targets = new ArrayList<>();
-        for (Rect blob : scanBlobsByDistance(color)) {
-            if (targets.size() >= HeldKarpPath.maxElements) break;
-            double[] location = getElementLocation(follower, blob);
-            targets.add(new Pose(location[0], location[1]));
-        }
-        return HeldKarpPath.plan(start, targets);
+    public Path getElementsPath(Follower follower, ColorRange color, Pose controlPoint) {
+        return BruteForcePath.plan(this, follower, color, controlPoint);
     }
 
     public boolean isSingleElement(Rect blob) {
