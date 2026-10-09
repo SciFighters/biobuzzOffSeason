@@ -16,6 +16,7 @@ import java.util.List;
 
 public final class BruteForcePath {
     public static final int maxElements = 4;
+    public static double mergeDistanceInches = 18;
 
     private BruteForcePath() {}
 
@@ -34,10 +35,13 @@ public final class BruteForcePath {
     public static Path plan(Pose start, List<Pose> targets, Pose controlPoint) {
         if (targets.isEmpty()) return null;
 
-        Pose[] points = new Pose[Math.min(targets.size(), maxElements) + 1];
+        List<Pose> selectedTargets = new ArrayList<>(
+                targets.subList(0, Math.min(targets.size(), maxElements)));
+        List<Pose> mergedTargets = mergeCloseTargets(selectedTargets);
+        Pose[] points = new Pose[mergedTargets.size() + 1];
         points[0] = start;
         for (int i = 1; i < points.length; i++) {
-            points[i] = targets.get(i - 1);
+            points[i] = mergedTargets.get(i - 1);
         }
 
         Pose[] bestOrder = findBestOrder(points, 1, controlPoint);
@@ -47,6 +51,38 @@ public final class BruteForcePath {
         }
         return path(segments).tangent();
     }
+
+    private static List<Pose> mergeCloseTargets(List<Pose> targets) {
+        List<Pose> remaining = new ArrayList<>(targets);
+        List<Pose> mergedTargets = new ArrayList<>();
+        while (remaining.size() > 1) {
+            int firstIndex = -1;
+            int secondIndex = -1;
+            double closestDistance = 1000;
+            for (int i = 0; i < remaining.size(); i++) {
+                for (int j = i + 1; j < remaining.size(); j++) {
+                    double distance = remaining.get(i).distance(remaining.get(j));
+                    if (distance <= mergeDistanceInches && distance < closestDistance) {
+                        closestDistance = distance;
+                        firstIndex = i;
+                        secondIndex = j;
+                    }
+                }
+            }
+            if (firstIndex == -1) break;
+
+            Pose first = remaining.get(firstIndex);
+            Pose second = remaining.get(secondIndex);
+            mergedTargets.add(new Pose(
+                    (first.x() + second.x()) / 2,
+                    (first.y() + second.y()) / 2));
+            remaining.remove(secondIndex);
+            remaining.remove(firstIndex);
+        }
+        mergedTargets.addAll(remaining);
+        return mergedTargets;
+    }
+
     private static double score(Pose[] points, Pose controlPoint) {
         double total = 0;
         for (int i = 1; i < points.length; i++) {

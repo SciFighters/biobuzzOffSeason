@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.commands;
 
 import com.pedropathing.follower.Follower;
+import com.pedropathing.math.Pose;
 import com.pedropathing.paths.Path;
 import com.pedropathing.utils.Angle;
 import com.seattlesolvers.solverslib.command.CommandBase;
@@ -8,6 +9,7 @@ import com.seattlesolvers.solverslib.controller.PIDController;
 import com.seattlesolvers.solverslib.pedroCommand.FollowPathCommand;
 import org.firstinspires.ftc.teamcode.subSystems.IntakeCameraSubsystem;
 import org.firstinspires.ftc.vision.opencv.ColorRange;
+import org.opencv.core.Point;
 import org.opencv.core.Rect;
 
 import java.util.List;
@@ -122,7 +124,7 @@ public class IntakeCameraCommands {
             follower.manual(0, 0, 0);
             follower.update();
 
-            Path path = camera.getElementsPath(follower, color);
+            Path path = camera.getElementsPath(follower, color, new Pose(0, 0, 0));
             pathCommand = path == null ? null : new FollowPathCommand(follower, path);
             if (pathCommand != null) pathCommand.initialize();
         }
