@@ -44,8 +44,8 @@ public class IntakeCameraSubsystem {
     public static double centerX = 400;
     public static double centerY = 300;
 
-    double cameraHeightInch = 2;
-    double cameraPitchDegrees = 60; // Positive below the horizon.
+    public static double cameraHeightInch = 2; // Height above the field floor; 0 disables height correction.
+    public static double cameraPitchDegrees = 60; // Positive below the horizon.
 
 
     private final Scalar yellowMin = new Scalar(yellowHueMin, 120, 80);
@@ -217,9 +217,13 @@ public class IntakeCameraSubsystem {
 
     public double[] getElementLocation(Follower follower, Rect blob) {
         Pose base = follower.pose();
-
         double distanceInches = getBlobDistance(blob);
-        double elementYaw = getXAngleOffset(blob);
+        double height = cameraHeightInch == 0 ? 0 : cameraHeightInch - pollenDiameterInches / 2;
+        distanceInches = Math.sqrt(Math.pow(distanceInches, 2) - Math.pow(height, 2));
+        double pitch = Math.toRadians(cameraPitchDegrees);
+        double x = (centerX - blob.x - blob.width / 2.0) / fox;
+        double y = (centerY - blob.y - blob.height / 2.0) / foy;
+        double elementYaw = Math.atan2(x, Math.cos(pitch) + y * Math.sin(pitch));
         double heading = base.heading();
 
         double xOffSet = Math.cos(heading + elementYaw) * distanceInches;
@@ -234,4 +238,9 @@ public class IntakeCameraSubsystem {
     public boolean isSingleElement(Rect blob) {
         return Math.abs(((double) blob.height / blob.width - 1)) <= elementRatio;
     }
+
+    public Pose getElementAbsolutePose(Pose blobPose, double cameraOffsetX, double cameraOffsetY) {
+        return new Pose(blobPose.x() + cameraOffsetX, blobPose.y() + cameraOffsetY, blobPose.heading());
+    }
+
 }
